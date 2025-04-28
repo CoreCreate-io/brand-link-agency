@@ -8,8 +8,8 @@ interface Params {
   }
 }
 
-export default async function TalentPage({ params }: Params) {
-  const { handle } = params
+export default async function TalentProfilePage({ params }: PageProps) {
+  const { handle } = params;
 
   const influencer = await client.fetch(
     groq`*[_type == "influencer" && handle == $handle][0]{
