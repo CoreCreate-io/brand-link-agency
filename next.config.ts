@@ -1,28 +1,30 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from 'next'
+import type { Configuration, RuleSetRule } from 'webpack'
+
+const nextConfig: NextConfig = {
   images: {
     domains: ['cdn.sanity.io'],
   },
   eslint: {
-    ignoreDuringBuilds: true, // 👈 Disable ESLint errors from blocking build on Vercel
+    ignoreDuringBuilds: true, // 👈 Ignore lint errors during Vercel build
   },
-  webpack(config: import('webpack').Configuration) {
-    const fileLoaderRule = config.module?.rules?.find((rule: any) => {
-      return rule?.test instanceof RegExp && rule.test.test('.svg');
-    });
+  webpack(config: Configuration) {
+    const fileLoaderRule = config.module?.rules?.find((rule) => {
+      return typeof rule === 'object' && rule.test instanceof RegExp && rule.test.test('.svg')
+    }) as RuleSetRule | undefined
 
     if (fileLoaderRule) {
-      fileLoaderRule.exclude = /\.svg$/i;
+      fileLoaderRule.exclude = /\.svg$/i
     }
 
     config.module?.rules?.push({
       test: /\.svg$/i,
       issuer: /\.[jt]sx?$/,
       use: ['@svgr/webpack'],
-    });
+    })
 
-    return config;
+    return config
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig
