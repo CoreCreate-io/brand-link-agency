@@ -30,13 +30,11 @@ const nextConfig: NextConfig = {
 
     return config;
   },
-}
+};
 
-export default nextConfig
-export async function generateStaticParams() {
-  const handles = await client.fetch(
-    groq`*[_type == "influencer"].handle`
-  );
-
-  return handles.map((handle: string) => ({ handle }));
-}
+export default nextConfig;
+export const { projectId, dataset, apiVersion } = {
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '9emdbysj',
+  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
+  apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2023-10-01',
+};
