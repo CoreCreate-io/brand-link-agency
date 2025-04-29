@@ -8,7 +8,7 @@ interface Params {
   }
 }
 
-export default async function TalentProfilePage({ params }: PageProps) {
+export default async function TalentProfilePage({ params }: Params) {
   const { handle } = params;
 
   const influencer = await client.fetch(
@@ -24,7 +24,6 @@ export default async function TalentProfilePage({ params }: PageProps) {
     }`,
     { handle }
   )
-  
 
   if (!influencer || !influencer.handle) {
     return (
