@@ -34,12 +34,12 @@ export default async function TalentProfilePage({ params }: PageProps) {
   return <TalentProfile influencer={influencer} />;
 }
 
-export async function generateStaticParams() {
+export async function generateStaticParams(): Promise<{ handle: string }[]> {
   const handles = await client.fetch(
     groq`*[_type == "influencer"].handle`
   );
 
   return handles
-    .filter((handle: string) => !!handle) // Ensure no null or undefined handles
+    .filter((handle: string) => !!handle)
     .map((handle: string) => ({ handle }));
 }

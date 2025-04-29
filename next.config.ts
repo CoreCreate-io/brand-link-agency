@@ -1,12 +1,12 @@
-import type { NextConfig } from 'next';
-import type { Configuration, RuleSetRule } from 'webpack';
+import type { NextConfig } from 'next'
+import type { Configuration, RuleSetRule } from 'webpack'
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['cdn.sanity.io'], // Allow images from Sanity's CDN
+    domains: ['cdn.sanity.io'],
   },
   eslint: {
-    ignoreDuringBuilds: true, // Ignore ESLint errors during builds
+    ignoreDuringBuilds: true,
   },
   webpack(config: Configuration) {
     const fileLoaderRule = config.module?.rules?.find((rule): rule is RuleSetRule => {
@@ -19,17 +19,24 @@ const nextConfig: NextConfig = {
     });
 
     if (fileLoaderRule) {
-      fileLoaderRule.exclude = /\.svg$/i; // Exclude SVGs from the default file loader
+      fileLoaderRule.exclude = /\.svg$/i;
     }
 
     config.module?.rules?.push({
       test: /\.svg$/i,
       issuer: /\.[jt]sx?$/,
-      use: ['@svgr/webpack'], // Use @svgr/webpack for SVGs
+      use: ['@svgr/webpack'],
     });
 
     return config;
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig
+export async function generateStaticParams() {
+  const handles = await client.fetch(
+    groq`*[_type == "influencer"].handle`
+  );
+
+  return handles.map((handle: string) => ({ handle }));
+}
