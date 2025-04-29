@@ -6,24 +6,29 @@ const nextConfig: NextConfig = {
     domains: ['cdn.sanity.io'],
   },
   eslint: {
-    ignoreDuringBuilds: true, // 👈 Ignore lint errors during Vercel build
+    ignoreDuringBuilds: true,
   },
   webpack(config: Configuration) {
-    const fileLoaderRule = config.module?.rules?.find((rule) => {
-      return typeof rule === 'object' && rule.test instanceof RegExp && rule.test.test('.svg')
-    }) as RuleSetRule | undefined
+    const fileLoaderRule = config.module?.rules?.find((rule): rule is RuleSetRule => {
+      return (
+        typeof rule === 'object' &&
+        rule !== null &&
+        rule.test instanceof RegExp &&
+        rule.test.test('.svg')
+      );
+    });
 
     if (fileLoaderRule) {
-      fileLoaderRule.exclude = /\.svg$/i
+      fileLoaderRule.exclude = /\.svg$/i;
     }
 
     config.module?.rules?.push({
       test: /\.svg$/i,
       issuer: /\.[jt]sx?$/,
       use: ['@svgr/webpack'],
-    })
+    });
 
-    return config
+    return config;
   },
 }
 
