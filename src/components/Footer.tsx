@@ -43,7 +43,7 @@ export default function Footer() {
     fetchFooter()
   }, [])
 
-  const iconMap: Record<string, JSX.Element> = {
+  const iconMap: Record<string, React.ReactElement> = {
     instagram: <Instagram className="h-5 w-5" />,
     youtube: <Youtube className="h-5 w-5" />,
     linkedin: <Linkedin className="h-5 w-5" />,
