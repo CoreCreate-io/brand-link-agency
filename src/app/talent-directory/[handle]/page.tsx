@@ -4,9 +4,7 @@ import { TalentProfile } from '@/components/TalentProfile';
 
 export default async function TalentProfilePage({
   params,
-}: {
-  params: { handle: string };
-}) {
+}: { params: { handle: string } }) {
   const { handle } = params;
 
   const influencer = await client.fetch(
