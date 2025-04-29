@@ -6,7 +6,7 @@ interface PageProps {
   params: { handle: string }
 }
 
-export default async function TalentProfilePage({ params }: { params: { handle: string } }) {
+export default async function TalentProfilePage({ params }: PageProps) {
   const { handle } = params
 
   const influencer = await client.fetch(
