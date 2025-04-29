@@ -3,7 +3,7 @@ import { groq } from 'next-sanity'
 import { TalentProfile } from '@/components/TalentProfile'
 
 export default async function TalentProfilePage({ params }: { params: { handle: string } }) {
-  const { handle } = params;
+  const { handle } = params
 
   const influencer = await client.fetch(
     groq`*[_type == "influencer" && handle == $handle][0]{
