@@ -4,11 +4,14 @@ import { TalentProfile } from '@/components/TalentProfile';
 
 export default async function TalentProfilePage({
   params,
-}: { params: { handle: string } }) {
+}: {
+  params: { handle: string };
+}) {
   const { handle } = params;
 
   const influencer = await client.fetch(
     groq`*[_type == "influencer" && handle == $handle][0]{
+      _id,
       name,
       handle,
       about,
@@ -21,7 +24,7 @@ export default async function TalentProfilePage({
     { handle }
   );
 
-  if (!influencer || !influencer.handle) {
+  if (!influencer) {
     return (
       <div className="flex items-center justify-center h-[70vh] text-gray-500">
         Influencer not found.
