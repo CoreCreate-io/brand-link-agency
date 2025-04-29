@@ -73,12 +73,17 @@ export default function Header() {
 
   useEffect(() => {
     async function fetchData() {
-      const menuData = await client.fetch(menuQuery);
-      const influencerData = await client.fetch(featuredInfluencersQuery);
-      const settingsData = await client.fetch(siteSettingsQuery);
+      try {
+        const menuData = await client.fetch(menuQuery);
+        const influencerData = await client.fetch(featuredInfluencersQuery);
+        const settingsData = await client.fetch(siteSettingsQuery);
 
-      setMenuLinks(menuData?.links || []);
-      setInfluencers(influencerData || []);
+        setMenuLinks(menuData?.links || []);
+        setInfluencers(influencerData || []);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+        setInfluencers([]); // Set to an empty array to avoid runtime errors
+      }
     }
     fetchData();
   }, []);
@@ -155,7 +160,12 @@ export default function Header() {
             className="flex items-center gap-4 hover:bg-accent hover:text-accent-foreground rounded-md p-2 transition"
           >
             <div className="relative w-12 h-12 rounded-full overflow-hidden border border-border">
-              <Image src={inf.imageUrl} alt={inf.name} fill className="object-cover" />
+              <Image
+  src={inf.imageUrl || "/fallback-image.png"}
+  alt={inf.name || "Unknown influencer"}
+  fill
+  className="object-cover"
+/>
             </div>
             <div className="text-sm font-semibold">
               @{inf.handle}
