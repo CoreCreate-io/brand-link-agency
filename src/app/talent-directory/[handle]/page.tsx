@@ -2,9 +2,9 @@ import { client } from '@/sanity/lib/client';
 import { groq } from 'next-sanity';
 import { TalentProfile } from '@/components/TalentProfile';
 
-interface PageProps {
-  params: { handle: string }; // Explicitly define the type of params
-}
+type PageProps = {
+  params: { handle: string };
+};
 
 export default async function TalentProfilePage({ params }: PageProps) {
   const { handle } = params;
@@ -34,12 +34,12 @@ export default async function TalentProfilePage({ params }: PageProps) {
   return <TalentProfile influencer={influencer} />;
 }
 
-export async function generateStaticParams(): Promise<{ handle: string }[]> {
-  const handles = await client.fetch(
-    groq`*[_type == "influencer"].handle`
+export async function generateStaticParams(): Promise<
+  { handle: string }[]
+> {
+  const handles: { handle: string }[] = await client.fetch(
+    groq`*[_type == "influencer" && defined(handle)]{ handle }`
   );
 
-  return handles
-    .filter((handle: string) => !!handle)
-    .map((handle: string) => ({ handle }));
+  return handles.map((h) => ({ handle: h.handle }));
 }
