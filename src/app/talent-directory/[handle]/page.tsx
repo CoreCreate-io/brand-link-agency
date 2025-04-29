@@ -2,11 +2,7 @@ import { client } from '@/sanity/lib/client';
 import { groq } from 'next-sanity';
 import { TalentProfile } from '@/components/TalentProfile';
 
-interface PageProps {
-  params: { handle: string }; // Ensure this matches Next.js expectations
-}
-
-export default async function TalentProfilePage({ params }: PageProps) {
+export default async function TalentProfilePage({ params }: { params: { handle: string } }) {
   const { handle } = params;
 
   const influencer = await client.fetch(
@@ -34,11 +30,12 @@ export default async function TalentProfilePage({ params }: PageProps) {
   return <TalentProfile influencer={influencer} />;
 }
 
-// Add this function to generate static params for dynamic routes
 export async function generateStaticParams() {
   const handles = await client.fetch(
     groq`*[_type == "influencer"].handle`
   );
 
-  return handles.map((handle: string) => ({ handle }));
+  return handles
+    .filter((handle: string) => !!handle) // Ensure no null or undefined handles
+    .map((handle: string) => ({ handle }));
 }

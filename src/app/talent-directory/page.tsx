@@ -39,6 +39,7 @@ export default function TalentDirectory() {
     async function fetchInfluencers() {
       const data = await client.fetch(allInfluencersQuery)
 
+      // Sort influencers by Instagram followers (or other criteria)
       const sortedData = data.sort((a: Influencer, b: Influencer) => 
         (b.instagramFollowers || 0) - (a.instagramFollowers || 0)
       );
@@ -50,13 +51,15 @@ export default function TalentDirectory() {
   }, [])
 
   return (
-<section className="w-full max-w-7xl mx-auto px-4 md:px-6 pt-35 pb-12 md:pt-50 md:pb-20">
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-    {influencers.map((inf, index) => (
-      <AnimatedCard key={inf._id} influencer={inf} index={index} />
-    ))}
-  </div>
-</section>
+    <section className="w-full max-w-7xl mx-auto px-4 md:px-6 pt-35 pb-12 md:pt-50 md:pb-20">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {influencers.map((inf, index) => (
+          inf.handle ? ( // Ensure the handle exists before rendering the card
+            <AnimatedCard key={inf._id} influencer={inf} index={index} />
+          ) : null
+        ))}
+      </div>
+    </section>
   )
 }
 
