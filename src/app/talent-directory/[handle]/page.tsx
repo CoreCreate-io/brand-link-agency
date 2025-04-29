@@ -2,7 +2,11 @@ import { client } from '@/sanity/lib/client'
 import { groq } from 'next-sanity'
 import { TalentProfile } from '@/components/TalentProfile'
 
-export default async function TalentProfilePage({ params }: { params: { handle: string } }) {
+interface PageProps {
+  params: { handle: string }
+}
+
+export default async function TalentProfilePage({ params }: PageProps) {
   const { handle } = params
 
   const influencer = await client.fetch(
