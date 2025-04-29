@@ -1,35 +1,38 @@
-import { client } from '@/sanity/lib/client';
-import { groq } from 'next-sanity';
-import { TalentProfile } from '@/components/TalentProfile';
+import { client } from "@/sanity/lib/client";
+import { groq } from "next-sanity";
+import { TalentProfile } from "@/components/TalentProfile";
+import { type SanityDocument } from "next-sanity";
+import { notFound } from "next/navigation";
+
+const QUERY = groq`*[
+  _type == "influencer" && handle == $handle
+][0]{
+  _id,
+  name,
+  handle,
+  about,
+  description,
+  "imageUrl": image.asset->url,
+  instagramFollowers,
+  tiktokFollowers,
+  youtubeFollowers
+}`;
+
+const options = { next: { revalidate: 30 } };
 
 export default async function TalentProfilePage({
   params,
 }: {
   params: { handle: string };
 }) {
-  const { handle } = params;
-
-  const influencer = await client.fetch(
-    groq`*[_type == "influencer" && handle == $handle][0]{
-      _id,
-      name,
-      handle,
-      about,
-      description,
-      "imageUrl": image.asset->url,
-      instagramFollowers,
-      tiktokFollowers,
-      youtubeFollowers
-    }`,
-    { handle }
+  const influencer = await client.fetch<SanityDocument | null>(
+    QUERY,
+    { handle: params.handle },
+    options
   );
 
   if (!influencer) {
-    return (
-      <div className="flex items-center justify-center h-[70vh] text-gray-500">
-        Influencer not found.
-      </div>
-    );
+    notFound();
   }
 
   return <TalentProfile influencer={influencer} />;
