@@ -79,6 +79,23 @@ export const pages = defineType({
       hidden: ({ parent }) => parent?.pageType === 'homepage' || parent?.pageType === 'services',
     }),
 
+    // homepage logos
+    defineField({
+      name: 'homepageLogos',
+      title: 'Homepage Logos',
+      type: 'array',
+      of: [
+        {
+          type: 'image',
+          options: {
+            accept: 'image/png',
+            hotspot: true,
+          },
+        },
+      ],
+      hidden: ({ parent }) => parent?.pageType !== 'homepage',
+    }),
+
     // ✅ Services Section
     defineField({
       name: 'servicesList',

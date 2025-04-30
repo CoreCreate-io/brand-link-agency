@@ -40,7 +40,11 @@ export const homePageQuery = `
   heroTitle,
   heroSubtitle,
   heroButtonText,
-  "heroImageUrl": heroImage.asset->url
+  "heroImageUrl": heroImage.asset->url,
+  homepageLogos[]{
+    "url": asset->url,
+    "alt": asset->altText
+  }
 }
 `
 
@@ -78,6 +82,7 @@ export const siteSettingsQuery = groq`
     "siteLogoUrl": siteLogo.asset->url
   }
 `
+
 
 
 
