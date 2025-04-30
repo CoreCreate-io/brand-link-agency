@@ -1,5 +1,5 @@
-import type { NextConfig } from 'next'
-import type { Configuration, RuleSetRule } from 'webpack'
+import type { NextConfig } from 'next';
+import type { Configuration, RuleSetRule } from 'webpack';
 
 const nextConfig: NextConfig = {
   images: {
@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   webpack(config: Configuration) {
+    // Find the existing file loader rule for .svg and exclude .svg files from it
     const fileLoaderRule = config.module?.rules?.find((rule): rule is RuleSetRule => {
       return (
         typeof rule === 'object' &&
@@ -22,6 +23,7 @@ const nextConfig: NextConfig = {
       fileLoaderRule.exclude = /\.svg$/i;
     }
 
+    // Add a new rule to handle .svg files with @svgr/webpack
     config.module?.rules?.push({
       test: /\.svg$/i,
       issuer: /\.[jt]sx?$/,
@@ -33,6 +35,7 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
 export const { projectId, dataset, apiVersion } = {
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '9emdbysj',
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
