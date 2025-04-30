@@ -8,8 +8,8 @@ import { type SanityDocument } from "next-sanity";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { PortableText } from "@portabletext/react";
-import { Instagram, Youtube } from "lucide-react"; // Import Instagram and Youtube icons
-import { TikTokIcon } from "@/components/ui/TikTokIcon"; // Import TikTokIcon
+import { Instagram, Youtube } from "lucide-react";
+import { TikTokIcon } from "@/components/ui/TikTokIcon";
 
 function formatFollowers(num: number | null | undefined) {
   if (!num) return "0";
@@ -49,10 +49,11 @@ const options = { next: { revalidate: 30 } };
 export default async function TalentProfilePage({
   params,
 }: {
-  params: { handle: string };
+  params: Promise<{ handle: string }>;
 }) {
-  const influencer = await client.fetch<SanityDocument | null>(QUERY, { handle: params.handle }, options);
-  const otherInfluencers = await client.fetch<SanityDocument[]>(OTHER_INFLUENCERS_QUERY, { handle: params.handle }, options);
+  const resolvedParams = await params; // Await the params to resolve the Promise
+  const influencer = await client.fetch<SanityDocument | null>(QUERY, { handle: resolvedParams.handle }, options);
+  const otherInfluencers = await client.fetch<SanityDocument[]>(OTHER_INFLUENCERS_QUERY, { handle: resolvedParams.handle }, options);
 
   if (!influencer) {
     notFound();
@@ -77,8 +78,8 @@ export default async function TalentProfilePage({
 
         {/* Stats and Info Section */}
         <div className="flex flex-col justify-center gap-4">
-          <h1 className="text-2xl font-bold">@{influencer.handle}</h1> {/* Smaller handle */}
-          <div className="text-sm text-gray-400"> {/* Smaller about section */}
+          <h1 className="text-2xl font-bold">@{influencer.handle}</h1>
+          <div className="text-sm text-gray-400">
             {influencer.about && <PortableText value={influencer.about} />}
           </div>
           <div className="flex flex-wrap gap-2 mt-4">
@@ -113,7 +114,7 @@ export default async function TalentProfilePage({
               <Link
                 key={other._id}
                 href={`/talent-directory/${other.slug || other.handle}`}
-                className="shrink-0 w-48 bg-secondary-dark rounded-lg p-4 border border-gray-300 dark:border-gray-700 transition-transform hover:scale-105" // Use Tailwind theme class
+                className="shrink-0 w-48 bg-secondary-dark rounded-lg p-4 border border-gray-300 dark:border-gray-700 transition-transform hover:scale-105"
               >
                 <div className="relative w-full h-48 rounded-lg overflow-hidden bg-secondary-dark">
                   <img
