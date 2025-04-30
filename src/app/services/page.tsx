@@ -45,7 +45,7 @@ export default function ServicesPage() {
         {isMounted &&
           services.map((service: any, index: number) => {
             const iconName = toPascalCase(service.icon?.trim() || "");
-            const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons];
+            const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons] as React.ElementType;
 
             return (
                 <motion.div
