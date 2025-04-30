@@ -106,17 +106,17 @@ export default async function TalentProfilePage({
       </div>
 
       {/* Other Influencers Section */}
-      <section className="mt-12">
-        <h2 className="text-2xl font-bold mb-4">Other Influencers</h2>
+      <section className="mt-12 w-screen -mx-4 md:-mx-8 px-4 md:px-8 bg-secondary-dark">
+        <h2 className="text-2xl font-bold mb-4 text-white">Other Influencers</h2>
         <ScrollArea className="w-full">
           <div className="flex w-max space-x-4 p-4">
             {otherInfluencers.map((other) => (
               <Link
                 key={other._id}
                 href={`/talent-directory/${other.slug || other.handle}`}
-                className="shrink-0 w-48 bg-secondary-dark rounded-lg p-4 border border-gray-300 dark:border-gray-700 transition-transform hover:scale-105"
+                className="shrink-0 w-55 bg-secondary-dark rounded-lg p-3 border border-gray-300 dark:border-gray-700 transition-transform hover:scale-105"
               >
-                <div className="relative w-full h-48 rounded-lg overflow-hidden bg-secondary-dark">
+                <div className="relative w-full h-55 rounded-lg overflow-hidden bg-secondary-dark">
                   <img
                     src={other.imageUrl || ""}
                     alt={other.name || "Influencer"}

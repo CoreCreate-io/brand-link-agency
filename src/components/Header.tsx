@@ -5,9 +5,8 @@ import { menuQuery, featuredInfluencersQuery, siteSettingsQuery } from "@/sanity
 import { client } from "@/sanity/lib/client";
 import Link from "next/link";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
@@ -44,32 +43,32 @@ interface Influencer {
   imageUrl: string;
 }
 
-
 export default function Header() {
   const { theme, setTheme } = useTheme();
-  const [show, setShow] = useState(true);
+  const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
   const [menuLinks, setMenuLinks] = useState<MenuLink[]>([]);
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
-  const [mounted, setMounted] = useState(false);
 
+  // Scroll detection using requestAnimationFrame
   useEffect(() => {
-    if (!mounted) return;
-  
-    const controlNavbar = () => {
-      const threshold = 2;
-      if (window.scrollY <= threshold) setShow(true);
-      else if (window.scrollY > lastScrollY) setShow(false);
-      else setShow(true);
-      setLastScrollY(window.scrollY);
+    const handleScroll = () => {
+      requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+        if (currentScrollY > lastScrollY && currentScrollY > 50) {
+          setShowHeader(false);
+        } else {
+          setShowHeader(true);
+        }
+        setLastScrollY(currentScrollY);
+      });
     };
-  
-    window.addEventListener("scroll", controlNavbar);
-    return () => window.removeEventListener("scroll", controlNavbar);
-  }, [mounted, lastScrollY]);
-  
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   useEffect(() => {
     async function fetchData() {
@@ -82,16 +81,19 @@ export default function Header() {
         setInfluencers(influencerData || []);
       } catch (error) {
         console.error("Failed to fetch data:", error);
-        setInfluencers([]); // Set to an empty array to avoid runtime errors
       }
     }
     fetchData();
   }, []);
-  
 
   return (
-    <header className={`fixed top-4 left-0 right-0 z-50 transition-all duration-500 ${show ? "translate-y-2 md:translate-y-5" : "-translate-y-full"}`}>
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
+    <motion.header
+      initial={{ y: 0 }}
+      animate={{ y: showHeader ? 0 : -100 }}
+      transition={{ duration: 0.4, ease: "easeInOut" }}
+      className="fixed top-0 left-0 right-0 z-50"
+    >
+      <div className="max-w-7xl mx-auto px-4 pt-5 md:px-6 md:pt-7">
 
         <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
           <DialogContent className="w-full h-dvh max-w-none rounded-none bg-white dark:bg-[#111111] p-6 overflow-y-auto flex flex-col items-center justify-center md:h-auto md:max-w-md md:rounded-2xl md:p-8">
@@ -130,70 +132,52 @@ export default function Header() {
 
         <div className="flex items-center justify-between rounded-full px-6 py-4 md:py-6 backdrop-blur-md bg-white/70 dark:bg-black/30 border border-gray-200 dark:border-white/10">
 
-        <div className="flex items-center text-black dark:text-white transition-colors duration-300">
-  <Link href="/" className="block relative w-32 md:w-36 h-10">
-    <BrandLinkLogo className="object-contain w-full h-full" />
-  </Link>
-</div>
+          <div className="flex items-center text-black dark:text-white transition-colors duration-300">
+            <Link href="/" className="block relative w-32 md:w-36 h-10">
+              <BrandLinkLogo className="object-contain w-full h-full" />
+            </Link>
+          </div>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium relative">
             <NavigationMenu>
               <NavigationMenuList>
-              <NavigationMenuItem>
-  {/* TRIGGER (single element, not link) */}
-  <NavigationMenuTrigger
-  className="bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent data-[state=active]:bg-transparent transition-none p-3"
->
-  Influencers
-</NavigationMenuTrigger>
-
-  {/* CONTENT */}
-  <NavigationMenuContent>
-  <ScrollArea className="max-h-80 w-[320px] overflow-y-auto p-4 bg-white dark:bg-[#111111] rounded-md shadow-lg border border-border">
-
-
-      <div className="flex flex-col gap-4">
-        {influencers.map((inf) => (
-          <Link
-            key={inf._id}
-            href={`/talent-directory/${inf.handle}`}
-            className="flex items-center gap-4 hover:bg-accent hover:text-accent-foreground rounded-md p-2 transition"
-          >
-            <div className="relative w-12 h-12 rounded-full overflow-hidden border border-border">
-              <Image
-  src={inf.imageUrl || "/fallback-image.png"}
-  alt={inf.name || "Unknown influencer"}
-  fill
-  className="object-cover"
-/>
-            </div>
-            <div className="text-sm font-semibold">
-              @{inf.handle}
-            </div>
-          </Link>
-        ))}
-
-        {/* ADD "View All" link at the bottom if you want */}
-        <Link
-          href="/talent-directory"
-          className="flex items-center justify-center gap-2 mt-4 text-sm font-semibold hover:underline"
-        >
-          View All Influencers →
-        </Link>
-      </div>
-    </ScrollArea>
-  </NavigationMenuContent>
-</NavigationMenuItem>
-
-
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent data-[state=open]:bg-transparent data-[state=active]:bg-transparent transition-none p-3">
+                    Influencers
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ScrollArea className="max-h-80 w-[320px] overflow-y-auto p-4 bg-white dark:bg-[#111111] rounded-md shadow-lg border border-border">
+                      <div className="flex flex-col gap-4">
+                        {influencers.map((inf) => (
+                          <Link key={inf._id} href={`/talent-directory/${inf.handle}`} className="flex items-center gap-4 hover:bg-accent hover:text-accent-foreground rounded-md p-2 transition">
+                            <div className="relative w-12 h-12 rounded-full overflow-hidden border border-border">
+                              <Image
+                                src={inf.imageUrl || "/fallback-image.png"}
+                                alt={inf.name || "Unknown influencer"}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="text-sm font-semibold">@{inf.handle}</div>
+                          </Link>
+                        ))}
+                        <Link href="/talent-directory" className="flex items-center justify-center gap-2 mt-4 text-sm font-semibold hover:underline">
+                          View All Influencers →
+                        </Link>
+                      </div>
+                    </ScrollArea>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
 
-            {menuLinks.filter(link => link.label.toLowerCase() !== "influencers").map((link) => (
-              <Link key={link.href} href={link.href} className="hover:underline">
-                {link.label}
-              </Link>
-            ))}
+            {menuLinks
+              .filter(link => link.label.toLowerCase() !== "influencers")
+              .map((link) => (
+                <Link key={link.href} href={link.href} className="hover:underline">
+                  {link.label}
+                </Link>
+              ))}
 
             <Button onClick={() => setIsContactDialogOpen(true)} className="h-9 px-4 py-2">Contact Us</Button>
 
@@ -202,8 +186,7 @@ export default function Header() {
             </Button>
           </nav>
 
-                    {/* Right: Mobile Nav */}
-                    <div className="md:hidden flex items-center gap-2">
+          <div className="md:hidden flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
               {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </Button>
@@ -214,76 +197,62 @@ export default function Header() {
                   <Menu className="w-6 h-6" />
                 </Button>
               </SheetTrigger>
-
               <SheetContent side="right" className="w-full max-w-full bg-white dark:bg-[#111111] p-0 flex flex-col">
-  
-  {/* Add hidden DialogTitle for accessibility */}
-  <div className="p-4">
-    <DialogTitle className="sr-only">Mobile Navigation Menu</DialogTitle>
-  </div>
+                <div className="p-4">
+                  <DialogTitle className="sr-only">Mobile Navigation Menu</DialogTitle>
+                </div>
+                <div className="flex-1 flex items-center justify-center">
+                  <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
+                    className="flex flex-col divide-y divide-gray-300 dark:divide-gray-700 w-full"
+                  >
+                    <div className="flex items-left justify-left p-6">
+                      <Link href="/" onClick={() => setIsMenuOpen(false)} className="block w-32 h-10 relative">
+                        <BrandLinkLogo className="object-contain w-full h-full" />
+                      </Link>
+                    </div>
+                    {menuLinks.map((link, index) => (
+                      <motion.div
+                        key={link.href}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.3 }}
+                      >
+                        <Link
+                          href={link.href}
+                          onClick={() => setIsMenuOpen(false)}
+                          className="block w-full text-5xl font-bold tracking-wide text-black dark:text-white px-8 py-6 text-left"
+                        >
+                          {link.label}
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </div>
 
-  <div className="flex-1 flex items-center justify-center">
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
-      className="flex flex-col divide-y divide-gray-300 dark:divide-gray-700 w-full"
-    >
-
-<div className="flex items-left justify-left p-6">
-  <Link href="/" onClick={() => setIsMenuOpen(false)} className="block w-32 h-10 relative">
-    <BrandLinkLogo className="object-contain w-full h-full" />
-  </Link>
-</div>
-
-      {menuLinks.map((link, index) => (
-        <motion.div
-          key={link.href}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.3 }}
-        >
-          <Link
-            href={link.href}
-            onClick={() => setIsMenuOpen(false)}
-            className="block w-full text-5xl font-bold tracking-wide text-black dark:text-white px-8 py-6 text-left"
-          >
-            {link.label}
-          </Link>
-        </motion.div>
-      ))}
-    </motion.div>
-  </div>
-
-{/* Sticky Mobile Contact + Join Buttons */}
-<div className="sticky bottom-4 px-8 flex flex-col gap-4">
-
-  {/* Join Brand Link Button */}
-  <Button
-    onClick={() => setIsContactDialogOpen(true)}
-    className="w-full py-7 text-lg font-semibold bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-colors"
-  >
-    Join Brand Link
-  </Button>
-
-  {/* Contact Us Button */}
-  <Button
-    onClick={() => setIsContactDialogOpen(true)}
-    variant="outline"
-    className="w-full py-7 text-lg font-semibold border-gray-300 dark:border-gray-700"
-  >
-    Contact Us
-  </Button>
-
-</div>
-
-</SheetContent>
-
+                <div className="sticky bottom-4 px-8 flex flex-col gap-4">
+                  <Button
+                    onClick={() => setIsContactDialogOpen(true)}
+                    className="w-full py-7 text-lg font-semibold bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-colors"
+                  >
+                    Join Brand Link
+                  </Button>
+                  <Button
+                    onClick={() => setIsContactDialogOpen(true)}
+                    variant="outline"
+                    className="w-full py-7 text-lg font-semibold border-gray-300 dark:border-gray-700"
+                  >
+                    Contact Us
+                  </Button>
+                </div>
+              </SheetContent>
             </Sheet>
           </div>
 
         </div>
       </div>
-    </header>
-  )
+    </motion.header>
+  );
 }
