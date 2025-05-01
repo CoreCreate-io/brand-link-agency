@@ -1,13 +1,13 @@
-import Hero from '@/components/Hero'
-import InfluencerGrid from '@/components/InfluencerGrid'
-import LogoSlider from '@/components/LogoSlider'
+import Hero from '@/components/Hero';
+import InfluencerGrid from '@/components/InfluencerGrid';
+import AutoplayLogoScroller from '@/components/AutoplayLogoScroller';
 
 export default function HomePage() {
   return (
     <main className="pt-20">
       <InfluencerGrid />
-      <LogoSlider />
+      <AutoplayLogoScroller />
       <Hero />
     </main>
-  )
+  );
 }
