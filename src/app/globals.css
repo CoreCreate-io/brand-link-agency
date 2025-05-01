@@ -121,4 +121,48 @@
   }
 }
 
+@keyframes marquee-left-start {
+  0% {
+    transform: translateX(-25%);
+  }
+  100% {
+    transform: translateX(-75%);
+  }
+}
+
+@keyframes marquee-right-start {
+  0% {
+    transform: translateX(-75%);
+  }
+  100% {
+    transform: translateX(-25%);
+  }
+}
+
+.marquee-inner {
+  display: flex;
+  width: 200%;
+  will-change: transform;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-duration: 30s;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-marquee-left-start {
+  animation-name: marquee-left-start;
+}
+
+.animate-marquee-right-start {
+  animation-name: marquee-right-start;
+}
+
+
+
+
+
+
+
+
 

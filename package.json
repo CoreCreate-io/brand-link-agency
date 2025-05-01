@@ -34,6 +34,7 @@
     "react-is": "^19.1.0",
     "rxjs": "^7.8.2",
     "sanity": "^3.86.1",
+    "sanity-plugin-media": "^3.0.2",
     "styled-components": "^6.1.17",
     "tailwind-merge": "^3.2.0"
   },

@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { motion, useAnimationFrame, useMotionValue } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { client } from '@/sanity/lib/client';
 import { homePageQuery } from '@/sanity/lib/queries';
@@ -24,62 +23,59 @@ export default function LogoSlider() {
 
   if (!logos.length) return null;
 
-  return (
-    <div className="relative overflow-hidden w-full py-10 bg-white dark:bg-black">
-      {/* Edge gradient fades */}
-      <div className="pointer-events-none absolute left-0 top-0 h-full w-24 bg-gradient-to-r from-white dark:from-black to-transparent z-10" />
-      <div className="pointer-events-none absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-white dark:from-black to-transparent z-10" />
+  const evenCount = logos.length % 2 === 0 ? logos.length : logos.length - 1;
+  const topLogos = logos.slice(0, evenCount / 2);
+  const bottomLogos = logos.slice(evenCount / 2, evenCount);
+  if (logos.length % 2 === 1) {
+    bottomLogos.push(logos[logos.length - 1]);
+  }
 
-      {/* Conveyor animation */}
-      <SliderTrack logos={logos} />
+  return (
+    <div className="relative w-full bg-white dark:bg-black py-10">
+      <div className="relative overflow-hidden w-full space-y-10">
+        {/* Gradient overlays */}
+        <div className="pointer-events-none absolute left-0 top-0 h-full w-24 z-10 bg-gradient-to-r from-white dark:from-black to-transparent" />
+        <div className="pointer-events-none absolute right-0 top-0 h-full w-24 z-10 bg-gradient-to-l from-white dark:from-black to-transparent" />
+
+        <SliderTrack logos={topLogos} direction="left" />
+        <SliderTrack logos={bottomLogos} direction="right" />
+      </div>
     </div>
   );
 }
 
-function SliderTrack({ logos }: { logos: Logo[] }) {
-  const x = useMotionValue(0);
-  const baseSpeed = 50; // pixels per second
-
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useAnimationFrame((t, delta) => {
-    const moveBy = (baseSpeed * delta) / 1000;
-    const width = containerRef.current?.offsetWidth ?? 0;
-    const currentX = x.get();
-
-    if (currentX <= -width / 2) {
-      x.set(0); // reset without flicker
-    } else {
-      x.set(currentX - moveBy);
-    }
-  });
+function SliderTrack({
+  logos,
+  direction = 'left',
+}: {
+  logos: Logo[];
+  direction: 'left' | 'right';
+}) {
+  const animationClass =
+    direction === 'left' ? 'animate-marquee-left-start' : 'animate-marquee-right-start';
 
   return (
-    <motion.div
-      ref={containerRef}
-      className="flex w-max"
-      style={{ x }}
-    >
-      <LogoRow logos={logos} />
-      <LogoRow logos={logos} />
-    </motion.div>
+    <div className="relative w-full overflow-hidden h-[50px]">
+      <div className={`marquee-inner ${animationClass}`}>
+        <LogoRow logos={logos} />
+        <LogoRow logos={logos} />
+      </div>
+    </div>
   );
 }
 
 function LogoRow({ logos }: { logos: Logo[] }) {
   return (
-    <div className="flex w-full">
+    <div className="flex gap-6 sm:gap-10 min-w-max">
       {logos.map((logo, index) => (
-        <div
-          key={index}
-          className="flex-1 flex items-center justify-center px-6"
-        >
+        <div key={index} className="flex items-center justify-center">
           <Image
             src={logo.url}
             alt={logo.alt || `Logo ${index}`}
             width={120}
             height={60}
-            className="object-contain h-[50px] dark:invert"
+            priority
+            className="object-contain h-[50px] dark:invert w-auto max-w-[120px]"
           />
         </div>
       ))}
