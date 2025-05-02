@@ -2,21 +2,43 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
+import { Calendar, Users, HandshakeIcon, BarChart } from "lucide-react"
 
 interface StatProps {
   number: number
   label: string
   suffix?: string
+  icon: React.ReactNode
 }
 
 const stats: StatProps[] = [
-  { number: 500, label: "Events Held", suffix: "+" },
-  { number: 25, label: "Million Followers", suffix: "M+" },
-  { number: 350, label: "Deals Closed", suffix: "+" },
-  { number: 98, label: "Client Satisfaction", suffix: "%" }
+  { 
+    number: 500, 
+    label: "Events Held", 
+    suffix: "+", 
+    icon: <Calendar className="h-8 w-8 mb-4 text-primary" strokeWidth={1.5} />
+  },
+  { 
+    number: 25, 
+    label: "Million Followers", 
+    suffix: "M+", 
+    icon: <Users className="h-8 w-8 mb-4 text-primary" strokeWidth={1.5} />
+  },
+  { 
+    number: 350, 
+    label: "Deals Closed", 
+    suffix: "+", 
+    icon: <HandshakeIcon className="h-8 w-8 mb-4 text-primary" strokeWidth={1.5} />
+  },
+  { 
+    number: 98, 
+    label: "Client Satisfaction", 
+    suffix: "%", 
+    icon: <BarChart className="h-8 w-8 mb-4 text-primary" strokeWidth={1.5} />
+  }
 ]
 
-function Stat({ number, label, suffix = "", index }: StatProps & { index: number }) {
+function Stat({ number, label, suffix = "", index, icon }: StatProps & { index: number }) {
   const [count, setCount] = useState(0)
   const [hasAnimated, setHasAnimated] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -75,8 +97,9 @@ function Stat({ number, label, suffix = "", index }: StatProps & { index: number
         delay: index * 0.2,
         ease: [0.215, 0.61, 0.355, 1] 
       }}
-      className="text-left md:text-center"
+      className="text-left md:text-center flex flex-col items-start md:items-center"
     >
+      {icon}
       <h3 className="text-4xl md:text-5xl font-bold mb-2">
         <span className="tabular-nums">{count}</span>{suffix}
       </h3>
