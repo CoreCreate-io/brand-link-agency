@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { client } from '@/sanity/lib/client';
 import { homePageQuery } from '@/sanity/lib/queries';
 
@@ -8,91 +9,90 @@ type Logo = {
   alt?: string;
 };
 
+
+const LOGOS_PER_ROW = 10; // Updated from 12 to 10
+
 const AutoplayLogoScroller = () => {
-  const [logos, setLogos] = useState<Logo[]>([]);
-  const [isDark, setIsDark] = useState(false);
+  const [topLogos, setTopLogos] = useState<Logo[]>([]);
+  const [bottomLogos, setBottomLogos] = useState<Logo[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       const data = await client.fetch(homePageQuery);
-      setLogos(data?.homepageLogos || []);
+      
+      // Verify we have exactly 10 logos for the top row
+      if (data?.topRowLogos?.length === LOGOS_PER_ROW) {
+        setTopLogos(data.topRowLogos);
+        // Set bottom logos if they exist
+        if (data?.bottomRowLogos?.length === LOGOS_PER_ROW) {
+          setBottomLogos(data.bottomRowLogos);
+        }
+        setTimeout(() => setIsLoaded(true), 500);
+      }
     };
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const checkDarkMode = () => {
-      setIsDark(document.documentElement.classList.contains('dark'));
-    };
-    checkDarkMode();
+  // Only render when we have exactly 10 logos for the top row
+  if (topLogos.length !== LOGOS_PER_ROW) return null;
 
-    const observer = new MutationObserver(checkDarkMode);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
-
-  if (logos.length === 0) return null;
-
-  const midpoint = Math.ceil(logos.length / 2);
-  const topRow = logos.slice(0, midpoint);
-  const bottomRow = logos.slice(midpoint);
-
-  const repeatLogos = (arr: Logo[], count = 3) =>
-    Array(count).fill(arr).flat();
-
-  const renderRow = (
-    logos: Logo[],
-    direction: 'left' | 'right',
-    padding: 'top' | 'bottom' | null
-  ) => {
-    const repeated = repeatLogos(logos, 5); // extra for mobile smoothness
-    const isRight = direction === 'right';
-    const padded = isRight
-      ? [...logos.slice(-3), ...repeated]
-      : repeated;
-
-    return (
-      <div
-        className="relative w-full overflow-hidden"
-        style={{
-          paddingTop: padding === 'top' ? '3rem' : undefined,
-          paddingBottom: padding === 'bottom' ? '1rem' : undefined,
-          '--bg-color': isDark ? '#000000' : '#ffffff',
-        } as React.CSSProperties}
-      >
-        <div
-          className={`flex whitespace-nowrap ${
-            isRight ? 'animate-scroll-right' : 'animate-scroll-left'
-          }`}
-        >
-          {padded.map((logo, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-center px-8 min-w-[160px] shrink-0"
-            >
-              <img
-                src={logo.url}
-                alt={logo.alt || `Logo ${index}`}
-                className="logo-image"
-                style={{
-                  maxHeight: '48px',
-                  maxWidth: '120px',
-                  objectFit: 'contain',
-                  filter: isDark ? 'invert(1)' : 'none',
-                  transition: 'filter 0.3s ease',
-                }}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
 
   return (
-    <div className="space-y-2">
-      {renderRow(logos.slice(0, Math.ceil(logos.length / 2)), 'left', 'top')}
-      {renderRow(logos.slice(Math.ceil(logos.length / 2)), 'right', 'bottom')}
+    <div className="relative w-full bg-background py-10"> {/* Changed from bg-white dark:bg-black */}
+      <div className={`relative overflow-hidden w-full space-y-10 transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+        {/* Gradient overlays - updated to use theme colors */}
+        <div className="pointer-events-none absolute left-0 top-0 h-full w-24 z-10 bg-gradient-to-r from-background to-transparent" />
+        <div className="pointer-events-none absolute right-0 top-0 h-full w-24 z-10 bg-gradient-to-l from-background to-transparent" />
+
+        {/* Top row - scrolling left */}
+        <div className="relative w-full overflow-hidden">
+          <div className="scroller-wrapper">
+            <div className="scroller-track scroller-left translate-z-0">  {/* Added translate-z-0 */}
+              {[...topLogos, ...topLogos, ...topLogos, ...topLogos, ...topLogos].map((logo, index) => (
+                <div 
+                  key={`top-${index}`} 
+                  className="scroller-item w-[120px] h-[50px] md:w-[180px] md:h-[80px] flex items-center justify-center px-4"
+                >
+                  <Image
+                    src={logo.url}
+                    alt={logo.alt || 'Logo'}
+                    width={100}
+                    height={50}
+                    priority={index < LOGOS_PER_ROW}
+                    className="w-[100px] h-[40px] md:w-[150px] md:h-[60px] object-contain dark:invert transform-gpu"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom row - scrolling right (only if logos exist) */}
+        {bottomLogos.length === LOGOS_PER_ROW && (
+          <div className="relative w-full overflow-hidden">
+            <div className="scroller-wrapper">
+              <div className="scroller-track scroller-right">
+                {[...bottomLogos, ...bottomLogos, ...bottomLogos, ...bottomLogos, ...bottomLogos].map((logo, index) => (
+                  <div 
+                    key={`bottom-${index}`} 
+                    className="scroller-item w-[120px] h-[50px] md:w-[180px] md:h-[80px] flex items-center justify-center px-4"
+                  >
+                    <Image
+                      src={logo.url}
+                      alt={logo.alt || 'Logo'}
+                      width={100}
+                      height={40}
+                      priority={index < LOGOS_PER_ROW}
+                      className="w-[100px] h-[40px] md:w-[150px] md:h-[60px] object-contain dark:invert transform-gpu"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

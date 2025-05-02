@@ -41,9 +41,13 @@ export const homePageQuery = `
   heroSubtitle,
   heroButtonText,
   "heroImageUrl": heroImage.asset->url,
-  homepageLogos[]{
+  topRowLogos[]{
     "url": asset->url,
-    "alt": asset->altText
+    "alt": alt
+  },
+  bottomRowLogos[]{
+    "url": asset->url,
+    "alt": alt
   }
 }
 `

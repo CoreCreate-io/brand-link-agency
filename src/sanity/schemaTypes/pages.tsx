@@ -81,9 +81,10 @@ export const pages = defineType({
 
     // homepage logos
     defineField({
-      name: 'homepageLogos',
-      title: 'Homepage Logos',
+      name: 'topRowLogos',
+      title: 'Top Row Logos (Scrolling Left)',
       type: 'array',
+      validation: Rule => Rule.length(10).error('Exactly 10 logos are required for the top row'),
       of: [
         {
           type: 'image',
@@ -91,6 +92,38 @@ export const pages = defineType({
             accept: 'image/png',
             hotspot: true,
           },
+          fields: [
+            {
+              name: 'alt',
+              type: 'string',
+              title: 'Alt Text',
+              description: 'Alternative text for accessibility',
+            }
+          ]
+        },
+      ],
+      hidden: ({ parent }) => parent?.pageType !== 'homepage',
+    }),
+    defineField({
+      name: 'bottomRowLogos',
+      title: 'Bottom Row Logos (Scrolling Right)',
+      type: 'array',
+      validation: Rule => Rule.length(10).error('Exactly 10 logos are required for the bottom row'),
+      of: [
+        {
+          type: 'image',
+          options: {
+            accept: 'image/png',
+            hotspot: true,
+          },
+          fields: [
+            {
+              name: 'alt',
+              type: 'string',
+              title: 'Alt Text',
+              description: 'Alternative text for accessibility',
+            }
+          ]
         },
       ],
       hidden: ({ parent }) => parent?.pageType !== 'homepage',

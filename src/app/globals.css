@@ -125,47 +125,78 @@
   display: none;
 }
 
+/* Logo Scroller Styles */
+.scroller-wrapper {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  overflow: hidden;
+  -webkit-mask-image: -webkit-linear-gradient(left, transparent 0%, black 10%, black 90%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+@media (min-width: 768px) {
+  .scroller-wrapper {
+    height: 80px;
+  }
+}
+
+.scroller-track {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: max-content;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+}
+
+.scroller-left {
+  animation: scroll-left 30s linear infinite;
+  transform: translate3d(0, 0, 0);
+}
+
+.scroller-right {
+  animation: scroll-right 30s linear infinite;
+  transform: translate3d(0, 0, 0);
+}
+
 @keyframes scroll-left {
   0% {
-    transform: translateX(0%);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translate3d(calc(-100% / 5), 0, 0);
   }
 }
 
 @keyframes scroll-right {
   0% {
-    transform: translateX(-50%);
+    transform: translate3d(calc(-100% / 5), 0, 0);
   }
   100% {
-    transform: translateX(0%);
+    transform: translate3d(0, 0, 0);
   }
 }
 
-.animate-scroll-left {
-  animation: scroll-left 30s linear infinite;
-}
-
-.animate-scroll-right {
-  animation: scroll-right 30s linear infinite;
-}
-
+/* Mobile optimizations */
 @media (max-width: 768px) {
-  .animate-scroll-left {
-    animation: scroll-left 10s linear infinite;
+  .scroller-track {
+    gap: 1rem;
   }
-  .animate-scroll-right {
-    animation: scroll-right 10s linear infinite;
+
+  .scroller-left,
+  .scroller-right {
+    animation-duration: 25s;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-play-state: running;
+    will-change: transform;
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
   }
 }
-
-
-
-
-
-
-
-
-
-
