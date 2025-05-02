@@ -3,8 +3,6 @@ import { ThemeProvider } from 'next-themes';
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import HeaderWrapper from '@/components/HeaderWrapper';
-import { client } from '@/sanity/lib/client';
-import { groq } from 'next-sanity';
 
 // Load Fonts
 const geistSans = Geist({
@@ -21,7 +19,9 @@ export const metadata: Metadata = {
   title: "Brand Link Agency",
   description: "Connecting brands with top-tier talent.",
   icons: {
-    icon: "/favicon.ico",
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
 };
 
