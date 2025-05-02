@@ -1,88 +1,98 @@
 "use client"
 
-import { motion, useMotionValue, useTransform, animate, useScroll } from "framer-motion"
-import { useEffect, useRef, useState } from "react"
+import { useState, useEffect, useRef } from "react"
+import { motion } from "framer-motion"
 
-interface SellingPoint {
+interface StatProps {
   number: number
   label: string
   suffix?: string
 }
 
-const sellingPoints: SellingPoint[] = [
+const stats: StatProps[] = [
   { number: 500, label: "Events Held", suffix: "+" },
-  { number: 1000, label: "Creators", suffix: "+" },
   { number: 25, label: "Million Followers", suffix: "M+" },
-  { number: 98, label: "Client Satisfaction", suffix: "%" },
+  { number: 350, label: "Deals Closed", suffix: "+" },
+  { number: 98, label: "Client Satisfaction", suffix: "%" }
 ]
 
-function Counter({ number, suffix = "", progress }: { number: number; suffix?: string; progress: number }) {
-  const count = useMotionValue(0)
-  const rounded = useTransform(count, Math.round)
+function Stat({ number, label, suffix = "", index }: StatProps & { index: number }) {
+  const [count, setCount] = useState(0)
+  const [hasAnimated, setHasAnimated] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const controls = animate(count, progress > 0.5 ? number : 0, {
-      duration: 2,
-      ease: "easeOut"
-    })
+    // Function to check if element is in viewport
+    const checkVisibility = () => {
+      if (!ref.current || hasAnimated) return
+      
+      const rect = ref.current.getBoundingClientRect()
+      // Only consider visible when element is at least 100px into the viewport
+      const isVisible = 
+        rect.top >= 0 &&
+        rect.top <= (window.innerHeight || document.documentElement.clientHeight) * 0.7
+      
+      if (isVisible && !hasAnimated) {
+        animateValue()
+        setHasAnimated(true)
+      }
+    }
 
-    return controls.stop
-  }, [count, number, progress])
+    // Animation function
+    const animateValue = () => {
+      let startTimestamp: number | null = null
+      const duration = 2000
+      const step = (timestamp: number) => {
+        if (!startTimestamp) startTimestamp = timestamp
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1)
+        setCount(Math.floor(progress * number))
+        if (progress < 1) {
+          window.requestAnimationFrame(step)
+        }
+      }
+      window.requestAnimationFrame(step)
+    }
 
-  return (
-    <motion.span className="tabular-nums inline-block">
-      <motion.span>{rounded}</motion.span>
-      {suffix}
-    </motion.span>
-  )
-}
-
-function StatItem({ point, index }: { point: SellingPoint; index: number }) {
-  const ref = useRef(null)
-  const [scrollProgress, setScrollProgress] = useState(0)
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "center center"]
-  })
-
-  useEffect(() => {
-    return scrollYProgress.onChange((latest) => {
-      setScrollProgress(latest)
-    })
-  }, [scrollYProgress])
-
-  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1])
-  const y = useTransform(scrollYProgress, [0, 1], [100, 0])
+    // Add scroll event listener
+    window.addEventListener('scroll', checkVisibility)
+    
+    // IMPORTANT: Don't check on mount, only check on scroll
+    // Remove this line: checkVisibility() 
+    
+    return () => window.removeEventListener('scroll', checkVisibility)
+  }, [number, hasAnimated])
 
   return (
     <motion.div
       ref={ref}
-      style={{ 
-        opacity,
-        y
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ 
+        opacity: hasAnimated ? 1 : 0, 
+        y: hasAnimated ? 0 : 50 
       }}
-      className="w-[45%] md:w-auto text-center"
+      transition={{ 
+        duration: 0.8,
+        delay: index * 0.2,
+        ease: [0.215, 0.61, 0.355, 1] 
+      }}
+      className="text-left md:text-center"
     >
-      <div className="text-4xl md:text-5xl font-bold mb-2">
-        <Counter 
-          number={point.number} 
-          suffix={point.suffix} 
-          progress={scrollProgress}
-        />
-      </div>
-      <div className="text-sm md:text-base text-muted-foreground">
-        {point.label}
-      </div>
+      <h3 className="text-4xl md:text-5xl font-bold mb-2">
+        <span className="tabular-nums">{count}</span>{suffix}
+      </h3>
+      <p className="text-sm md:text-base text-muted-foreground">
+        {label}
+      </p>
     </motion.div>
   )
 }
 
 export default function SellingPoints() {
   return (
-    <section className="w-full max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
-      <div className="flex flex-wrap justify-between gap-y-12">
-        {sellingPoints.map((point, index) => (
-          <StatItem key={point.label} point={point} index={index} />
+    <section className="w-full max-w-7xl mx-auto px-8 md:px-6 py-16 md:py-24">
+      <div className="flex flex-col items-start md:flex-row md:flex-wrap md:justify-between gap-y-12">
+        {stats.map((stat, index) => (
+          <Stat key={stat.label} {...stat} index={index} />
         ))}
       </div>
     </section>
