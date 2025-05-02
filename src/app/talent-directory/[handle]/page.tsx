@@ -10,6 +10,7 @@ import Link from "next/link";
 import { PortableText } from "@portabletext/react";
 import { Instagram, Youtube } from "lucide-react";
 import { TikTokIcon } from "@/components/ui/TikTokIcon";
+import { Metadata } from 'next';
 
 function formatFollowers(num: number | null | undefined) {
   if (!num) return "0";
@@ -27,7 +28,13 @@ const QUERY = groq`*[_type == "influencer" && handle == $handle][0]{
   "imageUrl": image.asset->url,
   instagramFollowers,
   tiktokFollowers,
-  youtubeFollowers
+  youtubeFollowers,
+  seo {
+    metaTitle,
+    metaDescription,
+    "shareImage": shareImage.asset->url,
+    keywords
+  }
 }`;
 
 const OTHER_INFLUENCERS_QUERY = groq`*[_type == "influencer" && handle != $handle]
@@ -45,6 +52,42 @@ const urlFor = (source: SanityImageSource) =>
   projectId && dataset ? imageUrlBuilder({ projectId, dataset }).image(source) : null;
 
 const options = { next: { revalidate: 30 } };
+
+export async function generateMetadata({ params }: { params: Promise<{ handle: string }> }): Promise<Metadata> {
+  const resolvedParams = await params;
+  const influencer = await client.fetch<SanityDocument | null>(QUERY, { handle: resolvedParams.handle }, options);
+
+  if (!influencer) {
+    return {
+      title: 'Not Found',
+      description: 'The requested influencer could not be found'
+    };
+  }
+
+  return {
+    title: influencer.seo?.metaTitle || `${influencer.name} (@${influencer.handle}) | Brand Link Agency`,
+    description: influencer.seo?.metaDescription || influencer.description || `Check out ${influencer.name}'s profile on Brand Link Agency`,
+    openGraph: {
+      title: influencer.seo?.metaTitle || `${influencer.name} (@${influencer.handle})`,
+      description: influencer.seo?.metaDescription || influencer.description,
+      images: [
+        {
+          url: influencer.seo?.shareImage || influencer.imageUrl || '',
+          width: 1200,
+          height: 630,
+          alt: `${influencer.name}'s profile`
+        }
+      ]
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: influencer.seo?.metaTitle || `${influencer.name} (@${influencer.handle})`,
+      description: influencer.seo?.metaDescription || influencer.description,
+      images: [influencer.seo?.shareImage || influencer.imageUrl || ''],
+    },
+    keywords: influencer.seo?.keywords || [`${influencer.name}`, 'influencer', 'brand link agency'],
+  };
+}
 
 export default async function TalentProfilePage({
   params,

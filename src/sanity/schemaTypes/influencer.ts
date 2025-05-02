@@ -6,6 +6,20 @@ export default defineType({
   name: 'influencer',
   title: 'Influencer',
   type: 'document',
+  groups: [
+    {
+      name: 'content',
+      title: 'Content',
+    },
+    {
+      name: 'social',
+      title: 'Social Media',
+    },
+    {
+      name: 'seo',
+      title: 'SEO & Metadata',
+    }
+  ],
   fields: [
     defineField({
       name: 'featured',
@@ -103,5 +117,55 @@ export default defineType({
       title: 'YouTube URL',
       type: 'url',
     }),
+
+    // SEO Fields
+    defineField({
+      name: 'seo',
+      title: 'SEO Settings',
+      type: 'object',
+      group: 'seo',
+      fields: [
+        defineField({
+          name: 'metaTitle',
+          title: 'Meta Title',
+          type: 'string',
+          description: 'Default to influencer name if left empty',
+          validation: Rule => Rule.max(60).warning('Should be under 60 characters')
+        }),
+        defineField({
+          name: 'metaDescription',
+          title: 'Meta Description',
+          type: 'text',
+          description: 'Default to short description if left empty',
+          rows: 3,
+          validation: Rule => Rule.max(160).warning('Should be under 160 characters')
+        }),
+        defineField({
+          name: 'shareImage',
+          title: 'Social Share Image',
+          type: 'image',
+          description: 'Default to profile image if left empty. Ideal size: 1200x630px',
+          options: {
+            hotspot: true,
+          }
+        }),
+        defineField({
+          name: 'keywords',
+          title: 'Keywords',
+          type: 'array',
+          of: [{ type: 'string' }],
+          options: {
+            layout: 'tags'
+          }
+        })
+      ]
+    }),
   ],
+  preview: {
+    select: {
+      title: 'name',
+      subtitle: 'handle',
+      media: 'image'
+    }
+  }
 })

@@ -48,6 +48,12 @@ export const homePageQuery = `
   bottomRowLogos[]{
     "url": asset->url,
     "alt": alt
+  },
+  seo {
+    metaTitle,
+    metaDescription,
+    "shareImage": shareImage.asset->url,
+    keywords
   }
 }
 `
@@ -59,6 +65,23 @@ export const pageContentQuery = `
     content
   }
 `
+
+export const pageQuery = `*[_type == "pages" && slug.current == $slug][0]{
+  title,
+  pageType,
+  content,
+  "slug": slug.current,
+  seo {
+    metaTitle,
+    metaDescription,
+    "shareImage": shareImage.asset->{
+      "url": url,
+      "alt": alt
+    },
+    keywords
+  },
+  // ...other fields specific to page type
+}`
 
 // Fetch the Main Menu
 export const menuQuery = `*[_type == "menu" && title == "Main Menu"][0] {

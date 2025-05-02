@@ -5,6 +5,16 @@ export const pages = defineType({
   name: 'pages',
   title: 'Pages',
   type: 'document',
+  groups: [
+    {
+      name: 'content',
+      title: 'Content',
+    },
+    {
+      name: 'seo',
+      title: 'SEO & Metadata',
+    }
+  ],
   fields: [
     defineField({
       name: 'title',
@@ -162,5 +172,47 @@ export const pages = defineType({
         },
       ],
     }),
-  ],
+
+    // SEO Fields
+    defineField({
+      name: 'seo',
+      title: 'SEO Settings',
+      type: 'object',
+      group: 'seo',
+      fields: [
+        defineField({
+          name: 'metaTitle',
+          title: 'Meta Title',
+          type: 'string',
+          description: 'Default to page title if left empty',
+          validation: Rule => Rule.max(60).warning('Should be under 60 characters')
+        }),
+        defineField({
+          name: 'metaDescription',
+          title: 'Meta Description',
+          type: 'text',
+          rows: 3,
+          validation: Rule => Rule.max(160).warning('Should be under 160 characters')
+        }),
+        defineField({
+          name: 'shareImage',
+          title: 'Social Share Image',
+          type: 'image',
+          description: 'Ideal size: 1200x630px',
+          options: {
+            hotspot: true,
+          }
+        }),
+        defineField({
+          name: 'keywords',
+          title: 'Keywords',
+          type: 'array',
+          of: [{ type: 'string' }],
+          options: {
+            layout: 'tags'
+          }
+        })
+      ]
+    })
+  ]
 })
