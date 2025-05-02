@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, useMotionValue, useTransform, animate, useInView } from "framer-motion"
+import { motion, useMotionValue, useTransform, animate, useScroll } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 
 interface SellingPoint {
@@ -16,19 +16,18 @@ const sellingPoints: SellingPoint[] = [
   { number: 98, label: "Client Satisfaction", suffix: "%" },
 ]
 
-function Counter({ number, suffix = "", shouldStart }: { number: number; suffix?: string; shouldStart: boolean }) {
+function Counter({ number, suffix = "", progress }: { number: number; suffix?: string; progress: number }) {
   const count = useMotionValue(0)
   const rounded = useTransform(count, Math.round)
 
   useEffect(() => {
-    if (shouldStart) {
-      animate(count, number, {
-        duration: 2,
-        ease: [0.215, 0.61, 0.355, 1],
-        delay: 1.8 // Increased initial delay before counting starts
-      })
-    }
-  }, [count, number, shouldStart])
+    const controls = animate(count, progress > 0.5 ? number : 0, {
+      duration: 2,
+      ease: "easeOut"
+    })
+
+    return controls.stop
+  }, [count, number, progress])
 
   return (
     <motion.span className="tabular-nums inline-block">
@@ -40,32 +39,27 @@ function Counter({ number, suffix = "", shouldStart }: { number: number; suffix?
 
 function StatItem({ point, index }: { point: SellingPoint; index: number }) {
   const ref = useRef(null)
-  const [hasAnimated, setHasAnimated] = useState(false)
-  const isInView = useInView(ref, {
-    once: true,
-    amount: 0.5,
-    margin: "-100px 0px"
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "center center"]
   })
 
   useEffect(() => {
-    if (isInView && !hasAnimated) {
-      // Increased initial delay before animation starts
-      const timer = setTimeout(() => {
-        setHasAnimated(true)
-      }, 1000) // 1 second initial delay
-      return () => clearTimeout(timer)
-    }
-  }, [isInView, hasAnimated])
+    return scrollYProgress.onChange((latest) => {
+      setScrollProgress(latest)
+    })
+  }, [scrollYProgress])
+
+  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1])
+  const y = useTransform(scrollYProgress, [0, 1], [100, 0])
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-      transition={{ 
-        duration: 1,
-        delay: 1 + (index * 0.3), // 1 second base delay plus stagger
-        ease: [0.215, 0.61, 0.355, 1]
+      style={{ 
+        opacity,
+        y
       }}
       className="w-[45%] md:w-auto text-center"
     >
@@ -73,7 +67,7 @@ function StatItem({ point, index }: { point: SellingPoint; index: number }) {
         <Counter 
           number={point.number} 
           suffix={point.suffix} 
-          shouldStart={hasAnimated}
+          progress={scrollProgress}
         />
       </div>
       <div className="text-sm md:text-base text-muted-foreground">
@@ -85,12 +79,12 @@ function StatItem({ point, index }: { point: SellingPoint; index: number }) {
 
 export default function SellingPoints() {
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
+    <section className="w-full max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
       <div className="flex flex-wrap justify-between gap-y-12">
         {sellingPoints.map((point, index) => (
           <StatItem key={point.label} point={point} index={index} />
         ))}
       </div>
-    </div>
+    </section>
   )
 }

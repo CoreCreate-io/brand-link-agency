@@ -1,5 +1,6 @@
 import Hero from '@/components/Hero';
 import InfluencerGrid from '@/components/InfluencerGrid';
+import SellingPoints from '@/components/SellingPoints';
 import AutoplayLogoScroller from '@/components/AutoplayLogoScroller';
 import { client } from '@/sanity/lib/client';
 import { homePageQuery } from '@/sanity/lib/queries';
@@ -41,6 +42,7 @@ export default function HomePage() {
       <InfluencerGrid />
       <AutoplayLogoScroller />
       <Hero />
+      <SellingPoints />
     </main>
   );
 }
