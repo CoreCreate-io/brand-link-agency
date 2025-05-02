@@ -8,7 +8,7 @@ import { type SanityDocument } from "next-sanity";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { PortableText } from "@portabletext/react";
-import { Instagram, Youtube } from "lucide-react";
+import { Instagram, Youtube, Facebook } from "lucide-react";
 import { TikTokIcon } from "@/components/ui/TikTokIcon";
 import { Metadata } from 'next';
 
@@ -26,9 +26,14 @@ const QUERY = groq`*[_type == "influencer" && handle == $handle][0]{
   about,
   description,
   "imageUrl": image.asset->url,
+  facebookFollowers,
   instagramFollowers,
   tiktokFollowers,
   youtubeFollowers,
+  facebookLink,
+  instagramLink,
+  tiktokLink,
+  youtubeLink,
   seo {
     metaTitle,
     metaDescription,
@@ -128,25 +133,51 @@ export default async function TalentProfilePage({
     </div>
 
     <div className="flex flex-wrap gap-2">
-      {influencer.instagramFollowers && (
-        <div className="flex items-center gap-2 bg-black/60 dark:bg-white/10 text-white text-xs font-medium rounded-full px-3 py-1">
-          <Instagram className="w-4 h-4" />
-          {formatFollowers(influencer.instagramFollowers)}
-        </div>
-      )}
-      {influencer.tiktokFollowers && (
-        <div className="flex items-center gap-2 bg-black/60 dark:bg-white/10 text-white text-xs font-medium rounded-full px-3 py-1">
-          <TikTokIcon className="w-4 h-4" />
-          {formatFollowers(influencer.tiktokFollowers)}
-        </div>
-      )}
-      {influencer.youtubeFollowers && (
-        <div className="flex items-center gap-2 bg-black/60 dark:bg-white/10 text-white text-xs font-medium rounded-full px-3 py-1">
-          <Youtube className="w-4 h-4" />
-          {formatFollowers(influencer.youtubeFollowers)}
-        </div>
-      )}
-    </div>
+  {influencer.facebookFollowers && (
+    <a
+      href={influencer.facebookLink || '#'}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 bg-black/60 dark:bg-white/10 text-white text-xs font-medium rounded-full px-3 py-1 hover:bg-black/80 dark:hover:bg-white/20 transition-colors"
+    >
+      <Facebook className="w-4 h-4" />
+      {formatFollowers(influencer.facebookFollowers)}
+    </a>
+  )}
+  {influencer.instagramFollowers && (
+    <a
+      href={influencer.instagramLink || '#'}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 bg-black/60 dark:bg-white/10 text-white text-xs font-medium rounded-full px-3 py-1 hover:bg-black/80 dark:hover:bg-white/20 transition-colors"
+    >
+      <Instagram className="w-4 h-4" />
+      {formatFollowers(influencer.instagramFollowers)}
+    </a>
+  )}
+  {influencer.tiktokFollowers && (
+    <a
+      href={influencer.tiktokLink || '#'}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 bg-black/60 dark:bg-white/10 text-white text-xs font-medium rounded-full px-3 py-1 hover:bg-black/80 dark:hover:bg-white/20 transition-colors"
+    >
+      <TikTokIcon className="w-4 h-4" />
+      {formatFollowers(influencer.tiktokFollowers)}
+    </a>
+  )}
+  {influencer.youtubeFollowers && (
+    <a
+      href={influencer.youtubeLink || '#'}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 bg-black/60 dark:bg-white/10 text-white text-xs font-medium rounded-full px-3 py-1 hover:bg-black/80 dark:hover:bg-white/20 transition-colors"
+    >
+      <Youtube className="w-4 h-4" />
+      {formatFollowers(influencer.youtubeFollowers)}
+    </a>
+  )}
+</div>
   </div>
 </div>
 

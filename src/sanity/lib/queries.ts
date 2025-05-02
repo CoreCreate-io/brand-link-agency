@@ -5,6 +5,7 @@ export const allInfluencersQuery = `
     handle,
     description,
     "imageUrl": image.asset->url,
+    facebookFollowers,
     instagramFollowers,
     tiktokFollowers,
     youtubeFollowers
@@ -18,6 +19,7 @@ export const featuredInfluencersQuery = `
     handle,
     description,
     "imageUrl": image.asset->url,
+    facebookFollowers,
     instagramFollowers,
     tiktokFollowers,
     youtubeFollowers,

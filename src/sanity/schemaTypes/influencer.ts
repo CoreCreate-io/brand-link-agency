@@ -69,6 +69,15 @@ export default defineType({
 
     // 🎯 Follower Counts
     defineField({
+      name: 'facebookFollowers',
+      title: 'Facebook Followers',
+      type: 'number',
+      components: {
+        input: NumberInputWithSeparators,
+      },
+      validation: (Rule) => Rule.min(0),
+    }),
+    defineField({
       name: 'instagramFollowers',
       title: 'Instagram Followers',
       type: 'number',

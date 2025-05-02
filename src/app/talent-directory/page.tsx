@@ -5,7 +5,7 @@ import { allInfluencersQuery } from '@/sanity/lib/queries'
 import { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
 import { TikTokIcon } from '@/components/ui/TikTokIcon'
-import { Instagram, Youtube } from 'lucide-react'
+import { Instagram, Youtube, Facebook } from 'lucide-react'
 import { motion, useAnimation, useInView } from 'framer-motion'
 import Link from "next/link"
 
@@ -27,6 +27,7 @@ interface Influencer {
   handle: string
   description: string
   imageUrl: string
+  facebookFollowers: number
   instagramFollowers: number
   tiktokFollowers: number
   youtubeFollowers: number
@@ -87,7 +88,7 @@ function AnimatedCard({ influencer, index }: { influencer: Influencer, index: nu
         animate={controls}
         whileHover={{ scale: 1.03, boxShadow: '0px 8px 24px rgba(0,0,0,0.15)' }}
         transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-        className="relative group overflow-hidden w-full h-auto rounded-2xl bg-white dark:bg-[#111111] border border-gray-200 dark:border-gray-700 p-4 flex flex-col"
+        className="relative group overflow-hidden w-full h-auto rounded-2xl bg-card dark:bg-card text-card-foreground dark:text-card-foreground border border-border p-4 flex flex-col"
       >
 
         {/* Image */}
@@ -101,26 +102,32 @@ function AnimatedCard({ influencer, index }: { influencer: Influencer, index: nu
         </div>
 
         {/* Username */}
-        <div className="mt-4 text-black dark:text-white text-lg font-bold">
+        <div className="mt-4 text-foreground dark:text-foreground text-lg font-bold">
           @{influencer.handle}
         </div>
 
         {/* Followers */}
         <div className="mt-2 flex flex-wrap gap-2">
+          {influencer.facebookFollowers !== undefined && influencer.facebookFollowers !== null && (
+            <div className="flex items-center gap-1 bg-secondary/60 dark:bg-secondary/60 text-secondary-foreground text-xs font-medium rounded-full px-3 py-1">
+              <Facebook className="w-4 h-4" />
+              {formatFollowers(influencer.facebookFollowers)}
+            </div>
+          )}
           {influencer.instagramFollowers !== undefined && influencer.instagramFollowers !== null && (
-            <div className="flex items-center gap-1 bg-black/60 dark:bg-white/10 text-white text-xs font-medium rounded-full px-3 py-1">
+            <div className="flex items-center gap-1 bg-secondary/60 dark:bg-secondary/60 text-secondary-foreground text-xs font-medium rounded-full px-3 py-1">
               <Instagram className="w-4 h-4" />
               {formatFollowers(influencer.instagramFollowers)}
             </div>
           )}
           {influencer.tiktokFollowers !== undefined && influencer.tiktokFollowers !== null && (
-            <div className="flex items-center gap-1 bg-black/60 dark:bg-white/10 text-white text-xs font-medium rounded-full px-3 py-1">
+            <div className="flex items-center gap-1 bg-secondary/60 dark:bg-secondary/60 text-secondary-foreground text-xs font-medium rounded-full px-3 py-1">
               <TikTokIcon className="w-4 h-4" />
               {formatFollowers(influencer.tiktokFollowers)}
             </div>
           )}
           {influencer.youtubeFollowers !== undefined && influencer.youtubeFollowers !== null && (
-            <div className="flex items-center gap-1 bg-black/60 dark:bg-white/10 text-white text-xs font-medium rounded-full px-3 py-1">
+            <div className="flex items-center gap-1 bg-secondary/60 dark:bg-secondary/60 text-secondary-foreground text-xs font-medium rounded-full px-3 py-1">
               <Youtube className="w-4 h-4" />
               {formatFollowers(influencer.youtubeFollowers)}
             </div>
@@ -129,7 +136,7 @@ function AnimatedCard({ influencer, index }: { influencer: Influencer, index: nu
 
         {/* Description */}
         {influencer.description && (
-          <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">
+          <p className="mt-4 text-sm text-muted-foreground dark:text-muted-foreground">
             {influencer.description}
           </p>
         )}

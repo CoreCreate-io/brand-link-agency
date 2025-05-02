@@ -5,7 +5,7 @@ import { featuredInfluencersQuery } from '@/sanity/lib/queries'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { TikTokIcon } from '@/components/ui/TikTokIcon'
-import { Instagram, Youtube } from 'lucide-react'
+import { Instagram, Youtube, Facebook } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from "next/link"
 
@@ -33,6 +33,7 @@ interface Influencer {
   handle: string
   description: string
   imageUrl: string
+  facebookFollowers: number
   instagramFollowers: number
   tiktokFollowers: number
   youtubeFollowers: number
@@ -91,6 +92,12 @@ export default function InfluencerGrid() {
                 @{inf.handle}
               </div>
               <div className="flex flex-wrap gap-2">
+                {hasFollowers(inf.facebookFollowers) && (
+                  <div className="flex items-center gap-1 bg-black/60 text-white text-xs font-medium rounded-full px-3 py-1">
+                    <Facebook className="w-4 h-4" />
+                    {formatFollowers(inf.facebookFollowers)}
+                  </div>
+                )}
                 {hasFollowers(inf.instagramFollowers) && (
                   <div className="flex items-center gap-1 bg-black/60 text-white text-xs font-medium rounded-full px-3 py-1">
                     <Instagram className="w-4 h-4" />
@@ -121,6 +128,12 @@ export default function InfluencerGrid() {
 
             {/* DESKTOP Follower stats (only show on hover) */}
             <div className="hidden md:flex flex-wrap gap-2 opacity-0 group-hover:opacity-100 transition-all duration-500">
+              {hasFollowers(inf.facebookFollowers) && (
+                <div className="flex items-center gap-1 bg-black/60 text-white text-xs font-medium rounded-full px-3 py-1">
+                  <Facebook className="w-4 h-4" />
+                  {formatFollowers(inf.facebookFollowers)}
+                </div>
+              )}
               {hasFollowers(inf.instagramFollowers) && (
                 <div className="flex items-center gap-1 bg-black/60 text-white text-xs font-medium rounded-full px-3 py-1">
                   <Instagram className="w-4 h-4" />
