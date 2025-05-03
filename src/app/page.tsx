@@ -36,13 +36,27 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Fetch the homepage data to use for all components
+  const homepageData = await client.fetch(homePageQuery, {}, options);
+  
+  // Debug what's coming back for troubleshooting
+  console.log('Homepage data in server component:', {
+    statsTitle: homepageData?.statsTitle,
+    sellingPointsCount: homepageData?.sellingPoints?.length
+  });
+
   return (
     <main className="pt-20">
       <InfluencerGrid />
       <AutoplayLogoScroller />
       <Hero />
-      <SellingPoints />
+      
+      {/* Pass the selling points data to the component */}
+      <SellingPoints 
+        stats={homepageData?.sellingPoints || []} 
+        title={homepageData?.statsTitle} 
+      />
     </main>
   );
 }

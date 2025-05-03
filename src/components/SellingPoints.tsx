@@ -2,41 +2,20 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
-import { Calendar, Users, HandshakeIcon, BarChart } from "lucide-react"
+import * as LucideIcons from "lucide-react"
 
 interface StatProps {
   number: number
   label: string
   suffix?: string
-  icon: React.ReactNode
+  icon: string // Changed to string for icon name
 }
 
-const stats: StatProps[] = [
-  { 
-    number: 500, 
-    label: "Events Held", 
-    suffix: "+", 
-    icon: <Calendar className="h-8 w-8 mb-4 text-primary" strokeWidth={1.5} />
-  },
-  { 
-    number: 25, 
-    label: "Million Followers", 
-    suffix: "M+", 
-    icon: <Users className="h-8 w-8 mb-4 text-primary" strokeWidth={1.5} />
-  },
-  { 
-    number: 350, 
-    label: "Deals Closed", 
-    suffix: "+", 
-    icon: <HandshakeIcon className="h-8 w-8 mb-4 text-primary" strokeWidth={1.5} />
-  },
-  { 
-    number: 98, 
-    label: "Client Satisfaction", 
-    suffix: "%", 
-    icon: <BarChart className="h-8 w-8 mb-4 text-primary" strokeWidth={1.5} />
-  }
-]
+// This function dynamically renders Lucide icons based on their name
+const DynamicIcon = ({ name, className }: { name: string, className?: string }) => {
+  const Icon = (LucideIcons as any)[name] || LucideIcons.HelpCircle;
+  return <Icon className={className} strokeWidth={1.5} />;
+};
 
 function Stat({ number, label, suffix = "", index, icon }: StatProps & { index: number }) {
   const [count, setCount] = useState(0)
@@ -78,9 +57,6 @@ function Stat({ number, label, suffix = "", index, icon }: StatProps & { index: 
     // Add scroll event listener
     window.addEventListener('scroll', checkVisibility)
     
-    // IMPORTANT: Don't check on mount, only check on scroll
-    // Remove this line: checkVisibility() 
-    
     return () => window.removeEventListener('scroll', checkVisibility)
   }, [number, hasAnimated])
 
@@ -99,7 +75,7 @@ function Stat({ number, label, suffix = "", index, icon }: StatProps & { index: 
       }}
       className="text-left md:text-center flex flex-col items-start md:items-center"
     >
-      {icon}
+      <DynamicIcon name={icon} className="h-8 w-8 mb-4 text-primary" />
       <h3 className="text-4xl md:text-5xl font-bold mb-2">
         <span className="tabular-nums">{count}</span>{suffix}
       </h3>
@@ -110,14 +86,55 @@ function Stat({ number, label, suffix = "", index, icon }: StatProps & { index: 
   )
 }
 
-export default function SellingPoints() {
+// Default stats if no data is provided from CMS
+const defaultStats: StatProps[] = [
+  { 
+    number: 500, 
+    label: "Events Held", 
+    suffix: "+", 
+    icon: "Calendar" 
+  },
+  { 
+    number: 25, 
+    label: "Million Followers", 
+    suffix: "M+", 
+    icon: "Users" 
+  },
+  { 
+    number: 350, 
+    label: "Deals Closed", 
+    suffix: "+", 
+    icon: "Handshake" 
+  },
+  { 
+    number: 98, 
+    label: "Client Satisfaction", 
+    suffix: "%", 
+    icon: "BarChart" 
+  }
+]
+
+interface SellingPointsProps {
+  stats?: StatProps[];
+  title?: string;
+}
+
+export default function SellingPoints({ stats = defaultStats, title }: SellingPointsProps) {
+  // Add debugging to see what's coming in
+  console.log('SellingPoints received:', { title, stats });
+  
   return (
     <section className="w-full max-w-7xl mx-auto px-8 md:px-6 py-16 md:py-24">
+      {/* Show the title if provided */}
+      {title && (
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">{title}</h2>
+      )}
+      
       <div className="flex flex-col items-start md:flex-row md:flex-wrap md:justify-between gap-y-12">
         {stats.map((stat, index) => (
-          <Stat key={stat.label} {...stat} index={index} />
+          <Stat key={`${stat.label}-${index}`} {...stat} index={index} />
         ))}
       </div>
     </section>
-  )
+  );
 }

@@ -27,30 +27,55 @@ export const featuredInfluencersQuery = `
 `;
 
 
+// Update the footerQuery
 export const footerQuery = `
-  *[_type == "footer"][0] {
-    aboutText,
-    socialLinks[] {
-      platform,
-      url
-    }
-  }
-`
+*[_type == "footer"][0] {
+  title,
+  aboutText,
+  socialLinksHeading,
+  socialLinks {
+    instagram,
+    facebook,
+    twitter,
+    tiktok,
+    linkedin,
+    youtube
+  },
+  newsletterHeading,
+  newsletterEnabled,
+  copyrightText
+}
+`;
 
 export const homePageQuery = `
 *[_type == "pages" && slug.current == "homepage"][0]{
-  heroTitle,
-  heroSubtitle,
-  heroButtonText,
-  "heroImageUrl": heroImage.asset->url,
-  topRowLogos[]{
+  // Hero section - Flatten nested fields
+  "heroTitle": heroSection.heroTitle,
+  "heroSubtitle": heroSection.heroSubtitle,
+  "heroButtonText": heroSection.heroButtonText,
+  "heroButtonUrl": heroSection.heroButtonUrl,
+  "heroImageUrl": heroSection.heroImage.asset->url,
+  
+  // Logos section - Keep as arrays for the scroller
+  "topRowLogos": logosSection.topRowLogos[]{
     "url": asset->url,
     "alt": alt
   },
-  bottomRowLogos[]{
+  "bottomRowLogos": logosSection.bottomRowLogos[]{
     "url": asset->url,
     "alt": alt
   },
+  
+  // Stats section
+  "statsTitle": statsSection.sectionTitle,
+  "sellingPoints": statsSection.sellingPoints[]{
+    number,
+    label,
+    suffix,
+    icon
+  },
+  
+  // SEO
   seo {
     metaTitle,
     metaDescription,

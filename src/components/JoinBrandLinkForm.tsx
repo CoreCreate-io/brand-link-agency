@@ -450,6 +450,12 @@ export default function JoinBrandLinkForm({ onClose }: { onClose?: () => void })
         {/* Step 3: About You and Submission */}
         {currentStep === 3 && (
           <>
+            {/* Add a heading similar to step 2 for consistency */}
+            <FormLabel className="text-sm font-medium mt-2 block">About You</FormLabel>
+            <FormDescription className="text-xs text-muted-foreground -mt-1 mb-2">
+              Tell us more about your content and audience
+            </FormDescription>
+            
             <FormField
               control={form.control}
               name="about"
@@ -457,8 +463,8 @@ export default function JoinBrandLinkForm({ onClose }: { onClose?: () => void })
                 <FormItem>
                   <FormControl>
                     <Textarea 
-                      placeholder="Tell us about yourself and your content..." 
-                      className="min-h-[120px] resize-none" 
+                      placeholder="Tell us about yourself, your content style, and your audience..." 
+                      className="min-h-[160px] resize-none" // Increased height
                       {...field}
                       maxLength={500}
                     />
@@ -472,7 +478,6 @@ export default function JoinBrandLinkForm({ onClose }: { onClose?: () => void })
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="terms"
@@ -485,7 +490,8 @@ export default function JoinBrandLinkForm({ onClose }: { onClose?: () => void })
                     />
                   </FormControl>
                   <div className="text-sm leading-none">
-                    I agree to the terms and conditions
+                    I agree to the terms and conditions and privacy policy. I understand that my information
+                    will be used as described.
                     <FormMessage />
                   </div>
                 </FormItem>

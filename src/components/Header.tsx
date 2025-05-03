@@ -170,7 +170,9 @@ export default function Header() {
             </Link>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium relative">
+          {/* Update the desktop navigation section */}
+          <nav className="hidden md:flex items-center gap-4 text-sm font-medium relative">
+            {/* NavigationMenu remains the same */}
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
@@ -206,36 +208,62 @@ export default function Header() {
             {menuLinks
               .filter(link => link.label.toLowerCase() !== "influencers")
               .map((link) => (
-                <Link key={link.href} href={link.href} className="hover:underline">
+                <Link 
+                  key={link.href} 
+                  href={link.href} 
+                  className="hover:underline px-2" // Add padding for consistent spacing
+                >
                   {link.label}
                 </Link>
               ))}
 
-            {/* Add Join Brand Link button here */}
-            <Button 
-              onClick={() => setIsJoinDialogOpen(true)}
-              variant="outline" 
-              className="h-9 px-4 py-2 border-primary text-primary hover:bg-primary/10"
-            >
-              Join Brand Link
-            </Button>
-            
-            <Button onClick={() => setIsContactDialogOpen(true)} className="h-9 px-4 py-2">Contact Us</Button>
+            {/* Button group with tighter spacing */}
+            <div className="flex items-center gap-2"> {/* Added container with smaller gap */}
+              {/* Updated Join Brand Link button with better hover effect */}
+              <Button 
+                onClick={() => setIsJoinDialogOpen(true)}
+                variant="outline" 
+                className="h-9 px-4 py-2 border-primary text-primary bg-transparent hover:bg-primary hover:text-white transition-colors"
+              >
+                Join Brand Link
+              </Button>
+              
+              <Button 
+                onClick={() => setIsContactDialogOpen(true)} 
+                className="h-9 px-4 py-2"
+              >
+                Contact Us
+              </Button>
 
-            <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
-              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-            </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                className="ml-0" // Reduce margin
+              >
+                {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              </Button>
+            </div>
           </nav>
 
+          {/* Update the mobile buttons section */}
           <div className="md:hidden flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            >
               {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </Button>
 
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="w-6 h-6" />
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="border-2 border-gray-300/70 dark:border-white/20 rounded-full h-10 w-10 flex items-center justify-center"
+                >
+                  <Menu className="w-[18px] h-[18px]" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-full max-w-full bg-white dark:bg-[#111111] p-0 flex flex-col">

@@ -4,19 +4,28 @@ import { useEffect, useState } from 'react'
 import { client } from '@/sanity/lib/client'
 import { footerQuery, menuQuery, footerMenuQuery } from '@/sanity/lib/queries'
 import Link from 'next/link'
-import { Instagram, Youtube, Linkedin, Twitter } from 'lucide-react'
+import { Instagram, Facebook, Twitter, Linkedin, Youtube } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 import { Button } from '@/components/ui/button'
 import BrandLinkLogo from '@/app/logo.svg'
+import { FaTiktok } from 'react-icons/fa'
 
-interface SocialLink {
-  platform: string
-  url: string
+interface SocialLinks {
+  instagram?: string
+  facebook?: string
+  twitter?: string
+  tiktok?: string
+  linkedin?: string
+  youtube?: string
 }
 
 interface FooterData {
   aboutText: string
-  socialLinks: SocialLink[]
+  socialLinks: SocialLinks
+  socialLinksHeading: string
+  newsletterHeading: string
+  newsletterEnabled: boolean
+  copyrightText: string
 }
 
 interface MenuData {
@@ -28,6 +37,7 @@ export default function Footer() {
   const [footerData, setFooterData] = useState<FooterData | null>(null)
   const [mainMenu, setMainMenu] = useState<MenuData | null>(null)
   const [footerMenu, setFooterMenu] = useState<MenuData | null>(null)
+  const [email, setEmail] = useState('')
 
   useEffect(() => {
     async function fetchFooter() {
@@ -36,6 +46,8 @@ export default function Footer() {
         client.fetch(menuQuery),
         client.fetch(footerMenuQuery),
       ])
+      
+      console.log('Footer data:', footerRes); // Debug
       setFooterData(footerRes)
       setMainMenu(mainMenuRes)
       setFooterMenu(footerMenuRes)
@@ -43,12 +55,19 @@ export default function Footer() {
     fetchFooter()
   }, [])
 
-  const iconMap: Record<string, React.ReactElement> = {
-    instagram: <Instagram className="h-5 w-5" />,
-    youtube: <Youtube className="h-5 w-5" />,
-    linkedin: <Linkedin className="h-5 w-5" />,
-    twitter: <Twitter className="h-5 w-5" />,
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Implement newsletter signup logic
+    console.log('Subscribe:', email)
+    // Clear input
+    setEmail('')
+    // Show success message
+    alert('Thank you for subscribing!')
   }
+
+  // Replace {year} with current year in copyright text
+  const copyrightText = footerData?.copyrightText?.replace('{year}', new Date().getFullYear().toString()) || 
+    `© ${new Date().getFullYear()} Brand Link Agency. All rights reserved.`
 
   return (
     <footer className="bg-background text-foreground px-6 py-12 transition-colors">
@@ -56,23 +75,52 @@ export default function Footer() {
         
         {/* Logo and About */}
         <div className="flex flex-col gap-4">
-        <Link href="/" className="block w-45 md:w-36 h-10 relative">
-  <BrandLinkLogo className="object-contain w-full h-full text-black dark:text-white" />
-</Link>
+          <Link href="/" className="block w-45 md:w-36 h-10 relative">
+            <BrandLinkLogo className="object-contain w-full h-full text-black dark:text-white" />
+          </Link>
           <p className="text-sm text-muted-foreground">{footerData?.aboutText}</p>
         </div>
 
         {/* Social Links */}
         <div className="flex flex-col gap-4">
-          <h4 className="text-lg font-semibold">Follow Us</h4>
+          <h4 className="text-lg font-semibold">{footerData?.socialLinksHeading || 'Follow Us'}</h4>
           <div className="flex gap-4">
-            {footerData?.socialLinks?.map((social) => (
-              social.url && iconMap[social.platform.toLowerCase()] && (
-                <Link key={social.platform} href={social.url} target="_blank" rel="noopener noreferrer">
-                  {iconMap[social.platform.toLowerCase()]}
-                </Link>
-              )
-            ))}
+            {footerData?.socialLinks?.instagram && (
+              <Link href={footerData.socialLinks.instagram} target="_blank" rel="noopener noreferrer" 
+                className="hover:text-primary transition-colors">
+                <Instagram className="h-5 w-5" />
+              </Link>
+            )}
+            {footerData?.socialLinks?.facebook && (
+              <Link href={footerData.socialLinks.facebook} target="_blank" rel="noopener noreferrer"
+                className="hover:text-primary transition-colors">
+                <Facebook className="h-5 w-5" />
+              </Link>
+            )}
+            {footerData?.socialLinks?.twitter && (
+              <Link href={footerData.socialLinks.twitter} target="_blank" rel="noopener noreferrer"
+                className="hover:text-primary transition-colors">
+                <Twitter className="h-5 w-5" />
+              </Link>
+            )}
+            {footerData?.socialLinks?.tiktok && (
+              <Link href={footerData.socialLinks.tiktok} target="_blank" rel="noopener noreferrer"
+                className="hover:text-primary transition-colors">
+                <FaTiktok className="h-5 w-5" />
+              </Link>
+            )}
+            {footerData?.socialLinks?.linkedin && (
+              <Link href={footerData.socialLinks.linkedin} target="_blank" rel="noopener noreferrer"
+                className="hover:text-primary transition-colors">
+                <Linkedin className="h-5 w-5" />
+              </Link>
+            )}
+            {footerData?.socialLinks?.youtube && (
+              <Link href={footerData.socialLinks.youtube} target="_blank" rel="noopener noreferrer"
+                className="hover:text-primary transition-colors">
+                <Youtube className="h-5 w-5" />
+              </Link>
+            )}
           </div>
         </div>
 
@@ -90,21 +138,25 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* Email Signup */}
-        <div className="flex flex-col gap-4">
-          <h4 className="text-lg font-semibold">Join Our List</h4>
-          <form className="flex items-center space-x-2 w-full max-w-md">
-            <Input
-              type="email"
-              placeholder="Email"
-              className="flex-1"
-              required
-            />
-            <Button type="submit">
-              Subscribe
-            </Button>
-          </form>
-        </div>
+        {/* Email Signup - Only show if enabled in CMS */}
+        {footerData?.newsletterEnabled !== false && (
+          <div className="flex flex-col gap-4">
+            <h4 className="text-lg font-semibold">{footerData?.newsletterHeading || 'Join Our List'}</h4>
+            <form className="flex items-center space-x-2 w-full max-w-md" onSubmit={handleSubscribe}>
+              <Input
+                type="email"
+                placeholder="Email"
+                className="flex-1"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Button type="submit">
+                Subscribe
+              </Button>
+            </form>
+          </div>
+        )}
 
       </div>
 
@@ -125,7 +177,7 @@ export default function Footer() {
 
         {/* Right: Copyright */}
         <div className="text-center md:text-right">
-          &copy; {new Date().getFullYear()} Brand Link Agency. All rights reserved.
+          {copyrightText}
         </div>
       </div>
     </footer>

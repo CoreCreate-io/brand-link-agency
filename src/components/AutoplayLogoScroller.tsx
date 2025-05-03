@@ -9,8 +9,7 @@ type Logo = {
   alt?: string;
 };
 
-
-const LOGOS_PER_ROW = 10; // Updated from 12 to 10
+const LOGOS_PER_ROW = 10;
 
 const AutoplayLogoScroller = () => {
   const [topLogos, setTopLogos] = useState<Logo[]>([]);
@@ -21,14 +20,21 @@ const AutoplayLogoScroller = () => {
     const fetchData = async () => {
       const data = await client.fetch(homePageQuery);
       
-      // Verify we have exactly 10 logos for the top row
+      // Debug what we're getting from Sanity
+      console.log("Logo data from Sanity:", data);
+      
+      // Check if we have logos
       if (data?.topRowLogos?.length === LOGOS_PER_ROW) {
         setTopLogos(data.topRowLogos);
-        // Set bottom logos if they exist
         if (data?.bottomRowLogos?.length === LOGOS_PER_ROW) {
           setBottomLogos(data.bottomRowLogos);
         }
         setTimeout(() => setIsLoaded(true), 500);
+      } else {
+        console.log("Missing logo data or incorrect count:", {
+          topRowCount: data?.topRowLogos?.length,
+          bottomRowCount: data?.bottomRowLogos?.length,
+        });
       }
     };
     fetchData();
@@ -37,9 +43,8 @@ const AutoplayLogoScroller = () => {
   // Only render when we have exactly 10 logos for the top row
   if (topLogos.length !== LOGOS_PER_ROW) return null;
 
-
   return (
-    <div className="relative w-full bg-background py-10"> {/* Changed from bg-white dark:bg-black */}
+    <div className="relative w-full bg-background py-10">
       <div className={`relative overflow-hidden w-full space-y-10 transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
         {/* Gradient overlays - updated to use theme colors */}
         <div className="pointer-events-none absolute left-0 top-0 h-full w-24 z-10 bg-gradient-to-r from-background to-transparent" />
@@ -48,7 +53,7 @@ const AutoplayLogoScroller = () => {
         {/* Top row - scrolling left */}
         <div className="relative w-full overflow-hidden">
           <div className="scroller-wrapper">
-            <div className="scroller-track scroller-left translate-z-0">  {/* Added translate-z-0 */}
+            <div className="scroller-track scroller-left"> 
               {[...topLogos, ...topLogos, ...topLogos, ...topLogos, ...topLogos].map((logo, index) => (
                 <div 
                   key={`top-${index}`} 
