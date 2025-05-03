@@ -9,9 +9,8 @@ import { Menu, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Input } from "@/components/ui/input";
 import BrandLinkLogo from '@/app/logo.svg';
-import { FormattedBudgetInput } from "@/components/FormattedBudgetInput";
+import ContactForm from "@/components/ContactForm"; // Import the new form component
 import {
   Dialog,
   DialogTrigger,
@@ -100,33 +99,15 @@ export default function Header() {
             <DialogClose asChild>
               <Button variant="ghost" size="icon" className="absolute top-4 right-4" />
             </DialogClose>
-            <DialogHeader className="space-y-1">
+            <DialogHeader className="space-y-1 w-full">
               <DialogTitle className="text-3xl font-bold text-center">Contact Us</DialogTitle>
               <DialogDescription className="text-center text-gray-500 dark:text-gray-400 pb-5">
-                Fill out the form and we’ll get back to you soon.
+                Fill out the form and we'll get back to you soon.
               </DialogDescription>
             </DialogHeader>
-            <form className="flex flex-col gap-4 w-full">
-              <div className="flex flex-row gap-2">
-                <Input type="text" placeholder="First Name*" required />
-                <Input type="text" placeholder="Last Name*" required />
-              </div>
-              <Input type="email" placeholder="Email Address*" required />
-              <div className="flex flex-row gap-2">
-                <Input type="tel" placeholder="Phone Number*" required />
-                <FormattedBudgetInput />
-              </div>
-              <textarea placeholder="Your Message" required rows={4}
-                className="flex w-full rounded-md border border-gray-300 dark:border-gray-700 bg-transparent px-4 py-3 text-sm text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white resize-none"
-              />
-              <div className="flex items-start space-x-2 mt-2">
-                <input id="terms" type="checkbox" required className="mt-1 w-5 h-5 rounded-md border-gray-300 dark:border-gray-700" />
-                <label htmlFor="terms" className="text-sm text-gray-700 dark:text-gray-300">
-                  I agree to the terms and conditions
-                </label>
-              </div>
-              <Button type="submit" className="w-full py-7 mt-4">Submit</Button>
-            </form>
+            
+            {/* Replace the form with our new component */}
+            <ContactForm onClose={() => setIsContactDialogOpen(false)} />
           </DialogContent>
         </Dialog>
 
