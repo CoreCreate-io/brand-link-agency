@@ -10,7 +10,8 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import BrandLinkLogo from '@/app/logo.svg';
-import ContactForm from "@/components/ContactForm"; // Import the new form component
+import ContactForm from "@/components/ContactForm";
+import JoinBrandLinkForm from "@/components/JoinBrandLinkForm"; // Import the new form component
 import {
   Dialog,
   DialogTrigger,
@@ -48,6 +49,7 @@ export default function Header() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
+  const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false); // New state for join dialog
   const [menuLinks, setMenuLinks] = useState<MenuLink[]>([]);
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
 
@@ -94,10 +96,30 @@ export default function Header() {
     >
       <div className="max-w-7xl mx-auto px-4 pt-5 md:px-6 md:pt-7">
 
-        <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
+        {/* Contact Dialog */}
+        <Dialog 
+          open={isContactDialogOpen} 
+          onOpenChange={(open) => {
+            setIsContactDialogOpen(open);
+            // Only close the menu if the dialog is closing and user explicitly clicked close
+            // Don't close the menu when opening the dialog
+            if (!open) {
+              // Optional: close the menu when dialog closes
+              // setIsMenuOpen(false);
+            }
+          }}
+        >
           <DialogContent className="w-full h-dvh max-w-none rounded-none bg-white dark:bg-[#111111] p-6 overflow-y-auto flex flex-col items-center justify-center md:h-auto md:max-w-md md:rounded-2xl md:p-8">
             <DialogClose asChild>
-              <Button variant="ghost" size="icon" className="absolute top-4 right-4" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="absolute top-4 right-4"
+                // This ensures the sheet stays open when closing just the dialog
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              />
             </DialogClose>
             <DialogHeader className="space-y-1 w-full">
               <DialogTitle className="text-3xl font-bold text-center">Contact Us</DialogTitle>
@@ -106,8 +128,37 @@ export default function Header() {
               </DialogDescription>
             </DialogHeader>
             
-            {/* Replace the form with our new component */}
             <ContactForm onClose={() => setIsContactDialogOpen(false)} />
+          </DialogContent>
+        </Dialog>
+        
+        {/* Join Brand Link Dialog */}
+        <Dialog 
+          open={isJoinDialogOpen} 
+          onOpenChange={(open) => {
+            setIsJoinDialogOpen(open);
+            // Don't close the menu when dialog closes
+          }}
+        >
+          <DialogContent className="w-full h-dvh max-w-none rounded-none bg-white dark:bg-[#111111] p-6 overflow-y-auto flex flex-col items-center justify-center md:h-auto md:max-w-md md:rounded-2xl md:p-8">
+            <DialogClose asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="absolute top-4 right-4"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              />
+            </DialogClose>
+            <DialogHeader className="space-y-1 w-full">
+              <DialogTitle className="text-3xl font-bold text-center">Join Brand Link</DialogTitle>
+              <DialogDescription className="text-center text-gray-500 dark:text-gray-400 pb-5">
+                Apply to join our influencer network
+              </DialogDescription>
+            </DialogHeader>
+            
+            <JoinBrandLinkForm onClose={() => setIsJoinDialogOpen(false)} />
           </DialogContent>
         </Dialog>
 
@@ -160,6 +211,15 @@ export default function Header() {
                 </Link>
               ))}
 
+            {/* Add Join Brand Link button here */}
+            <Button 
+              onClick={() => setIsJoinDialogOpen(true)}
+              variant="outline" 
+              className="h-9 px-4 py-2 border-primary text-primary hover:bg-primary/10"
+            >
+              Join Brand Link
+            </Button>
+            
             <Button onClick={() => setIsContactDialogOpen(true)} className="h-9 px-4 py-2">Contact Us</Button>
 
             <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
@@ -215,13 +275,25 @@ export default function Header() {
 
                 <div className="sticky bottom-4 px-8 flex flex-col gap-4">
                   <Button
-                    onClick={() => setIsContactDialogOpen(true)}
+                    onClick={(e) => {
+                      // Prevent default to avoid any automatic closing
+                      e.preventDefault();
+                      // Open the Join dialog without closing the sheet
+                      setIsJoinDialogOpen(true);
+                      // We don't call setIsMenuOpen(false) here anymore
+                    }}
                     className="w-full py-7 text-lg font-semibold bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-colors"
                   >
                     Join Brand Link
                   </Button>
                   <Button
-                    onClick={() => setIsContactDialogOpen(true)}
+                    onClick={(e) => {
+                      // Prevent default to avoid any automatic closing
+                      e.preventDefault();
+                      // Open the Contact dialog without closing the sheet
+                      setIsContactDialogOpen(true);
+                      // We don't call setIsMenuOpen(false) here anymore
+                    }}
                     variant="outline"
                     className="w-full py-7 text-lg font-semibold border-gray-300 dark:border-gray-700"
                   >

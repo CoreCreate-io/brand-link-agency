@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -32,8 +32,29 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+// Helper function to format currency
+const formatCurrency = (value: string): string => {
+  // Remove non-numeric characters except decimal point
+  const numericValue = value.replace(/[^\d.]/g, '');
+  
+  // Handle decimal points correctly
+  const parts = numericValue.split('.');
+  
+  // Format the whole number part with commas
+  let formattedValue = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  
+  // Add back decimal part if it exists
+  if (parts.length > 1) {
+    // Limit to 2 decimal places
+    formattedValue += '.' + parts[1].slice(0, 2);
+  }
+  
+  return formattedValue;
+};
+
 export default function ContactForm({ onClose }: { onClose?: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formattedBudget, setFormattedBudget] = useState("");
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -47,6 +68,18 @@ export default function ContactForm({ onClose }: { onClose?: () => void }) {
       terms: false,
     },
   });
+
+  // Watch budget field to update formatted display
+  const budgetValue = form.watch("budget");
+  
+  // Update formatted budget display when budget value changes
+  useEffect(() => {
+    if (budgetValue) {
+      setFormattedBudget(formatCurrency(budgetValue));
+    } else {
+      setFormattedBudget("");
+    }
+  }, [budgetValue]);
 
   async function onSubmit(data: FormValues) {
     setIsSubmitting(true);
@@ -67,6 +100,7 @@ export default function ContactForm({ onClose }: { onClose?: () => void }) {
 
       toast.success("Message sent successfully! We'll be in touch soon.");
       form.reset();
+      setFormattedBudget("");
       if (onClose) onClose();
     } catch (error) {
       toast.error("Failed to send message. Please try again.");
@@ -112,7 +146,11 @@ export default function ContactForm({ onClose }: { onClose?: () => void }) {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input type="email" placeholder="Email Address*" {...field} />
+                <Input 
+                  type="email" 
+                  placeholder="Email Address*" 
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -126,7 +164,17 @@ export default function ContactForm({ onClose }: { onClose?: () => void }) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input placeholder="Phone Number*" {...field} />
+                  <Input 
+                    type="tel" 
+                    inputMode="numeric" 
+                    placeholder="Phone Number*" 
+                    {...field}
+                    onChange={(e) => {
+                      // Allow only numbers, spaces, and common phone separators
+                      const value = e.target.value.replace(/[^\d\s()-+]/g, '');
+                      field.onChange(value);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -138,15 +186,26 @@ export default function ContactForm({ onClose }: { onClose?: () => void }) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input 
-                    placeholder="Budget (optional)" 
-                    {...field} 
-                    onChange={(e) => {
-                      // Remove non-numeric characters except decimal point
-                      const value = e.target.value.replace(/[^\d.]/g, '');
-                      field.onChange(value);
-                    }}
-                  />
+                  <div className="relative">
+                    <Input 
+                      type="text" 
+                      inputMode="decimal" 
+                      placeholder="Budget (optional)" 
+                      className="pl-7"
+                      value={formattedBudget}
+                      onChange={(e) => {
+                        // Extract just the numbers for the actual value
+                        const rawValue = e.target.value.replace(/[^\d.]/g, '');
+                        field.onChange(rawValue);
+                      }}
+                    />
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      $
+                    </div>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+                      AUD
+                    </div>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
