@@ -5,7 +5,7 @@ import { menuQuery, featuredInfluencersQuery, siteSettingsQuery } from "@/sanity
 import { client } from "@/sanity/lib/client";
 import Link from "next/link";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
-import { Menu, Sun, Moon } from "lucide-react";
+import { Menu, Sun, Moon, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -110,17 +110,11 @@ export default function Header() {
           }}
         >
           <DialogContent className="w-full h-dvh max-w-none rounded-none bg-white dark:bg-[#111111] p-6 overflow-y-auto flex flex-col items-center justify-center md:h-auto md:max-w-md md:rounded-2xl md:p-8">
-            <DialogClose asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute top-4 right-4"
-                // This ensures the sheet stays open when closing just the dialog
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              />
+            <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
             </DialogClose>
+            
             <DialogHeader className="space-y-1 w-full">
               <DialogTitle className="text-3xl font-bold text-center">Contact Us</DialogTitle>
               <DialogDescription className="text-center text-gray-500 dark:text-gray-400 pb-5">
@@ -141,16 +135,11 @@ export default function Header() {
           }}
         >
           <DialogContent className="w-full h-dvh max-w-none rounded-none bg-white dark:bg-[#111111] p-6 overflow-y-auto flex flex-col items-center justify-center md:h-auto md:max-w-md md:rounded-2xl md:p-8">
-            <DialogClose asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute top-4 right-4"
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              />
+            <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
             </DialogClose>
+            
             <DialogHeader className="space-y-1 w-full">
               <DialogTitle className="text-3xl font-bold text-center">Join Brand Link</DialogTitle>
               <DialogDescription className="text-center text-gray-500 dark:text-gray-400 pb-5">

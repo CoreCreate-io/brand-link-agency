@@ -5,6 +5,7 @@ import AutoplayLogoScroller from '@/components/AutoplayLogoScroller';
 import { client } from '@/sanity/lib/client';
 import { homePageQuery } from '@/sanity/lib/queries';
 import { Metadata } from 'next';
+import AutoplayImageScroller from '@/components/AutoplayImageScroller';
 
 const options = { next: { revalidate: 30 } };
 
@@ -43,7 +44,9 @@ export default async function HomePage() {
   // Debug what's coming back for troubleshooting
   console.log('Homepage data in server component:', {
     statsTitle: homepageData?.statsTitle,
-    sellingPointsCount: homepageData?.sellingPoints?.length
+    sellingPointsCount: homepageData?.sellingPoints?.length,
+    imageScrollerEnabled: homepageData?.showImageScroller,
+    hasTopRowImages: (homepageData?.topRowImages?.length || 0) > 0
   });
 
   return (
@@ -57,6 +60,11 @@ export default async function HomePage() {
         stats={homepageData?.sellingPoints || []} 
         title={homepageData?.statsTitle} 
       />
+      
+      {/* Only render the image scroller if enabled and has images */}
+      {homepageData?.showImageScroller && homepageData?.topRowImages?.length >= 8 && (
+        <AutoplayImageScroller />
+      )}
     </main>
   );
 }

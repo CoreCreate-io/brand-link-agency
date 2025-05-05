@@ -48,7 +48,7 @@ export const footerQuery = `
 `;
 
 export const homePageQuery = `
-*[_type == "pages" && slug.current == "homepage"][0]{
+*[_type == "pages" && pageType == "homepage"][0]{
   // Hero section - Flatten nested fields
   "heroTitle": heroSection.heroTitle,
   "heroSubtitle": heroSection.heroSubtitle,
@@ -81,7 +81,21 @@ export const homePageQuery = `
     metaDescription,
     "shareImage": shareImage.asset->url,
     keywords
-  }
+  },
+  
+  // Image Scroller
+  "topRowImages": imageScroller.topRowImages[]{
+    "url": asset->url,
+    "alt": alt,
+    ratio
+  },
+  "bottomRowImages": imageScroller.bottomRowImages[]{
+    "url": asset->url,
+    "alt": alt,
+    ratio
+  },
+  // Add this line to get the enabled flag from Sanity
+  "showImageScroller": imageScroller.enabled
 }
 `
 

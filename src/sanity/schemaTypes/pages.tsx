@@ -20,6 +20,10 @@ export const pages = defineType({
       title: 'Logos Section',
     },
     {
+      name: 'imageScroller', // Add this new group
+      title: 'Image Scroller',
+    },
+    {
       name: 'stats',
       title: 'Statistics & Selling Points',
     },
@@ -314,6 +318,99 @@ export const pages = defineType({
           }
         })
       ]
-    })
+    }),
+
+    // Image Scroller Section - Updated to use its own group
+    defineField({
+      name: 'imageScroller',
+      title: 'Image Scroller',
+      type: 'object',
+      group: 'imageScroller', // Changed from 'hero' to 'imageScroller'
+      hidden: ({ parent }) => parent?.pageType !== 'homepage',
+      fields: [
+        defineField({
+          name: 'enabled',  // Added an enable/disable toggle
+          title: 'Enable Image Scroller',
+          type: 'boolean',
+          initialValue: false,
+        }),
+        defineField({
+          name: 'topRowImages',
+          title: 'Top Row Images (Scrolling Left)',
+          type: 'array',
+          hidden: ({ parent }) => !parent?.enabled,  // Only show when enabled
+          validation: Rule => Rule.min(8).error('At least 8 images are required for the top row'),
+          of: [
+            {
+              type: 'image',
+              options: {
+                hotspot: true,
+              },
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Alternative text for accessibility',
+                },
+                {
+                  name: 'ratio',
+                  title: 'Aspect Ratio',
+                  type: 'string',
+                  options: {
+                    list: [
+                      { title: 'Square (1:1)', value: '1/1' },
+                      { title: 'Landscape (16:9)', value: '16/9' },
+                      { title: 'Landscape (4:3)', value: '4/3' },
+                      { title: 'Landscape (3:2)', value: '3/2' },
+                      { title: 'Portrait (1:2)', value: '1/2' },
+                    ],
+                  },
+                  initialValue: '3/2',
+                }
+              ]
+            },
+          ],
+        }),
+        defineField({
+          name: 'bottomRowImages',
+          title: 'Bottom Row Images (Scrolling Right)',
+          type: 'array',
+          hidden: ({ parent }) => !parent?.enabled,  // Only show when enabled
+          validation: Rule => Rule.min(8).error('At least 8 images are required for the bottom row'),
+          of: [
+            {
+              type: 'image',
+              options: {
+                hotspot: true,
+              },
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Alternative text for accessibility',
+                },
+                {
+                  name: 'ratio',
+                  title: 'Aspect Ratio',
+                  type: 'string',
+                  options: {
+                    list: [
+                      { title: 'Square (1:1)', value: '1/1' },
+                      { title: 'Landscape (16:9)', value: '16/9' },
+                      { title: 'Landscape (4:3)', value: '4/3' },
+                      { title: 'Landscape (3:2)', value: '3/2' },
+                      { title: 'Portrait (1:2)', value: '1/2' },
+                    ],
+                  },
+                  initialValue: '3/2',
+                }
+              ]
+            },
+          ],
+        }),
+      ],
+    }),
   ]
 })

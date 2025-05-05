@@ -9,6 +9,17 @@ import { Input } from "@/components/ui/input"
 import { Button } from '@/components/ui/button'
 import BrandLinkLogo from '@/app/logo.svg'
 import { FaTiktok } from 'react-icons/fa'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog"
+import { X } from "lucide-react"
+import ContactForm from "@/components/ContactForm"
+import JoinBrandLinkForm from "@/components/JoinBrandLinkForm"
 
 interface SocialLinks {
   instagram?: string
@@ -38,6 +49,8 @@ export default function Footer() {
   const [mainMenu, setMainMenu] = useState<MenuData | null>(null)
   const [footerMenu, setFooterMenu] = useState<MenuData | null>(null)
   const [email, setEmail] = useState('')
+  const [isContactDialogOpen, setIsContactDialogOpen] = useState(false)
+  const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false)
 
   useEffect(() => {
     async function fetchFooter() {
@@ -71,6 +84,49 @@ export default function Footer() {
 
   return (
     <footer className="bg-background text-foreground px-6 py-12 transition-colors">
+      {/* Dialogs for mobile forms */}
+      <Dialog 
+        open={isContactDialogOpen} 
+        onOpenChange={setIsContactDialogOpen}
+      >
+        <DialogContent className="w-full h-dvh max-w-none rounded-none bg-white dark:bg-[#111111] p-6 overflow-y-auto flex flex-col items-center justify-center md:h-auto md:max-w-md md:rounded-2xl md:p-8">
+          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </DialogClose>
+          
+          <DialogHeader className="space-y-1 w-full">
+            <DialogTitle className="text-3xl font-bold text-center">Contact Us</DialogTitle>
+            <DialogDescription className="text-center text-gray-500 dark:text-gray-400 pb-5">
+              Fill out the form and we'll get back to you soon.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ContactForm onClose={() => setIsContactDialogOpen(false)} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog 
+        open={isJoinDialogOpen} 
+        onOpenChange={setIsJoinDialogOpen}
+      >
+        <DialogContent className="w-full h-dvh max-w-none rounded-none bg-white dark:bg-[#111111] p-6 overflow-y-auto flex flex-col items-center justify-center md:h-auto md:max-w-md md:rounded-2xl md:p-8">
+          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </DialogClose>
+          
+          <DialogHeader className="space-y-1 w-full">
+            <DialogTitle className="text-3xl font-bold text-center">Join Brand Link</DialogTitle>
+            <DialogDescription className="text-center text-gray-500 dark:text-gray-400 pb-5">
+              Apply to join our influencer network
+            </DialogDescription>
+          </DialogHeader>
+          
+          <JoinBrandLinkForm onClose={() => setIsJoinDialogOpen(false)} />
+        </DialogContent>
+      </Dialog>
+
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
         
         {/* Logo and About */}
@@ -79,8 +135,28 @@ export default function Footer() {
             <BrandLinkLogo className="object-contain w-full h-full text-black dark:text-white" />
           </Link>
           <p className="text-sm text-muted-foreground">{footerData?.aboutText}</p>
+          
+          {/* Mobile-only buttons - updated with fixed function name */}
+          <div className="md:hidden flex flex-row gap-3 mt-2 flex-wrap">
+            <Button 
+              onClick={() => setIsJoinDialogOpen(true)}
+              variant="outline" 
+              size="sm"
+              className="border-primary text-primary bg-transparent hover:bg-primary hover:text-white transition-colors flex-1 min-w-[120px]"
+            >
+              Join Brand Link
+            </Button>
+            <Button 
+              onClick={() => setIsContactDialogOpen(true)}
+              size="sm" 
+              className="flex-1 min-w-[120px]"
+            >
+              Contact Us
+            </Button>
+          </div>
         </div>
 
+        {/* Rest of the footer remains unchanged */}
         {/* Social Links */}
         <div className="flex flex-col gap-4">
           <h4 className="text-lg font-semibold">{footerData?.socialLinksHeading || 'Follow Us'}</h4>
@@ -157,7 +233,6 @@ export default function Footer() {
             </form>
           </div>
         )}
-
       </div>
 
       {/* Separation Line */}

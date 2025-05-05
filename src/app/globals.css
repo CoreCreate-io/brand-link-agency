@@ -129,8 +129,8 @@
 .scroller-wrapper {
   position: relative;
   width: 100%;
-  height: 50px;
   overflow: hidden;
+  height: 50px;
   -webkit-mask-image: -webkit-linear-gradient(left, transparent 0%, black 10%, black 90%, transparent 100%);
   mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
 }
@@ -142,26 +142,63 @@
 }
 
 .scroller-track {
-  position: absolute;
+  position: relative;
   display: flex;
   align-items: center;
   gap: 2rem;
   width: max-content;
-  will-change: transform;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  -webkit-transform: translate3d(0, 0, 0);
 }
 
+/* Mobile-first styles with simpler animation properties */
 .scroller-left {
-  animation: scroll-left 30s linear infinite;
-  transform: translate3d(0, 0, 0);
+  animation-name: scroll-left;
+  animation-duration: 25s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
 }
 
 .scroller-right {
-  animation: scroll-right 30s linear infinite;
-  transform: translate3d(0, 0, 0);
+  animation-name: scroll-right;
+  animation-duration: 25s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
+}
+
+/* For iOS devices specifically */
+@supports (-webkit-touch-callout: none) {
+  .scroller-wrapper {
+    -webkit-transform: translateZ(0); /* Fix for Safari */
+  }
+
+  .scroller-left, .scroller-right {
+    animation-duration: 30s; /* Slightly slower on iOS */
+  }
+  
+  .scroller-item img {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
+
+/* Better quality animations for desktop */
+@media (min-width: 768px) {
+  .scroller-track {
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+  
+  .scroller-left {
+    animation-duration: 30s;
+  }
+  
+  .scroller-right {
+    animation-duration: 30s;
+  }
 }
 
 @keyframes scroll-left {
@@ -198,5 +235,94 @@
     will-change: transform;
     -webkit-transform-style: preserve-3d;
     transform-style: preserve-3d;
+  }
+}
+
+/* Add this to your globals.css file, separate from the logo scroller styles */
+
+/* Image Scroller Styles - distinct from Logo Scroller */
+.img-scroller {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  height: auto;
+  -webkit-mask-image: -webkit-linear-gradient(left, transparent 0%, black 5%, black 95%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+  -webkit-transform: translateZ(0); /* Fix for Safari */
+}
+
+.img-track {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  width: max-content;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  -webkit-transform-style: preserve-3d; /* Add to fix Safari rendering */
+  transform-style: preserve-3d;
+}
+
+.img-item {
+  width: 280px;
+  min-width: 280px;
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  .img-item {
+    width: 320px;
+    min-width: 320px;
+  }
+  
+  .img-track {
+    gap: 1rem;
+  }
+}
+
+.img-left {
+  animation: img-scroll-left 60s linear infinite;
+}
+
+.img-right {
+  animation: img-scroll-right 60s linear infinite;
+}
+
+@keyframes img-scroll-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% / 3)); }
+}
+
+@keyframes img-scroll-right {
+  from { transform: translateX(calc(-100% / 3)); }
+  to { transform: translateX(0); }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .img-left,
+  .img-right {
+    animation-duration: 45s;
+  }
+}
+
+/* Add these specific fixes for iOS/Safari */
+@supports (-webkit-touch-callout: none) {
+  .img-left, .img-right {
+    will-change: transform;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-perspective: 1000;
+    perspective: 1000;
+  }
+  
+  .img-item img {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 }
