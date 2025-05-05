@@ -243,7 +243,27 @@ export const pages = defineType({
       ],
     }),
 
+    // Add this field right before the introText field in the Services Section
+    
     // Services Section
+    defineField({
+      name: 'statementTitle',
+      title: 'Statement Title',
+      type: 'string',
+      description: 'A brief statement or headline about your services',
+      hidden: ({ parent }) => parent?.pageType !== 'services',
+      group: 'content',
+    }),
+    defineField({
+      name: 'introText',
+      title: 'Introduction Text',
+      type: 'text',
+      description: 'Introductory paragraph shown below the statement title',
+      hidden: ({ parent }) => parent?.pageType !== 'services',
+      group: 'content',
+      rows: 4,
+    }),
+    // ... rest of your schema
     defineField({
       name: 'servicesList',
       title: 'Services List',
@@ -273,7 +293,24 @@ export const pages = defineType({
               description: 'Enter the name of the Lucide icon (e.g. "users", "star", "camera")',
               validation: (Rule) => Rule.required(),
             }),
+            // Add this new image field
+            defineField({
+              name: 'image',
+              title: 'Service Image',
+              type: 'image',
+              options: {
+                hotspot: true, // Enables the hotspot tool for more precise cropping
+              },
+              description: 'Image to display for this service (ideal ratio 16:9)',
+            }),
           ],
+          preview: {
+            select: {
+              title: 'title',
+              subtitle: 'description',
+              media: 'image'
+            },
+          },
         },
       ],
     }),
@@ -333,6 +370,21 @@ export const pages = defineType({
           title: 'Enable Image Scroller',
           type: 'boolean',
           initialValue: false,
+        }),
+        defineField({
+          name: 'title',
+          title: 'Section Title',
+          type: 'string',
+          description: 'Heading for the image scroller section',
+          hidden: ({ parent }) => !parent?.enabled,
+        }),
+        defineField({
+          name: 'body',
+          title: 'Section Body',
+          type: 'text',
+          rows: 3,
+          description: 'Optional descriptive text that appears below the title',
+          hidden: ({ parent }) => !parent?.enabled,
         }),
         defineField({
           name: 'topRowImages',

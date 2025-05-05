@@ -246,8 +246,6 @@
   width: 100%;
   overflow: hidden;
   height: auto;
-  -webkit-mask-image: -webkit-linear-gradient(left, transparent 0%, black 5%, black 95%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
   -webkit-transform: translateZ(0); /* Fix for Safari */
 }
 
@@ -266,22 +264,30 @@
   transform-style: preserve-3d;
 }
 
+
+/* For mobile, use a size that fits better on small screens */
 .img-item {
-  width: 280px;
-  min-width: 280px;
+  width: 300px;
+  min-width: 300px;
   padding: 0;
 }
 
 @media (min-width: 768px) {
   .img-item {
-    width: 320px;
-    min-width: 320px;
-  }
-  
-  .img-track {
-    gap: 1rem;
+    width: 400px;
+    min-width: 400px;
   }
 }
+  
+  .img-track {
+    gap: 1rem; /* Increase from 1rem for more space between images */
+  }
+  
+  @media (min-width: 768px) {
+    .img-track {
+      gap: 1rem; /* Increase from 1rem for desktop */
+    }
+  }
 
 .img-left {
   animation: img-scroll-left 60s linear infinite;

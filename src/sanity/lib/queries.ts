@@ -94,8 +94,9 @@ export const homePageQuery = `
     "alt": alt,
     ratio
   },
-  // Add this line to get the enabled flag from Sanity
-  "showImageScroller": imageScroller.enabled
+  "imageScrollerTitle": imageScroller.title,
+"imageScrollerBody": imageScroller.body,
+"showImageScroller": imageScroller.enabled
 }
 `
 
@@ -152,7 +153,31 @@ export const siteSettingsQuery = groq`
 `
 
 
+// Add this to your existing file
 
+// Services page query
+export const servicesPageQuery = groq`
+  *[_type == "pages" && pageType == "services"][0]{
+    title,
+    servicesList[] {
+      title,
+      description,
+      icon,
+      image {
+        asset-> {
+          _id,
+          url
+        }
+      }
+    },
+    seo {
+      metaTitle,
+      metaDescription,
+      "shareImage": shareImage.asset->url,
+      keywords
+    }
+  }
+`;
 
 
 
