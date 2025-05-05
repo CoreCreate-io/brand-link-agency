@@ -47,10 +47,11 @@ function getEventImageUrl(source: any) {
 }
 
 // First, update the helper function to show 3 events per row on desktop
-const getCarouselItemClass = (totalEvents) => {
+const getCarouselItemClass = (totalEvents: number): string => {
   if (totalEvents === 1) return "basis-full"; 
   if (totalEvents === 2) return "basis-full sm:basis-1/2";
   if (totalEvents === 3 || totalEvents > 3) return "basis-full sm:basis-1/2 lg:basis-1/3"; // 3+ events show 3 per row
+  return "basis-full"; // Default fallback
 };
 
 export default function EventsPage() {
@@ -59,7 +60,26 @@ export default function EventsPage() {
     description: "",
     services: []
   });
-  const [events, setEvents] = useState([]);
+
+  type EventStat = {
+    value: string;
+    label: string;
+  };
+
+  type Event = {
+    _id: string;
+    title: string;
+    slug?: {
+      current: string;
+    };
+    mainImage: any;
+    eventDate: string;
+    location: string;
+    description: string;
+    stats?: EventStat[];
+  };
+
+  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -98,7 +118,7 @@ export default function EventsPage() {
   const carouselItemClass = getCarouselItemClass(events.length);
 
   // Update the eventsPerView function to match
-  const eventsPerView = () => {
+  const eventsPerView = (): number => {
     if (typeof window === 'undefined') return 1; // Server-side default
     
     // First check the total number of events
@@ -111,7 +131,7 @@ export default function EventsPage() {
   };
 
   // Add this helper function to detect device capability
-  const getDeviceMaxEvents = () => {
+  const getDeviceMaxEvents = (): number => {
     const width = window.innerWidth;
     if (width >= 1024) return 3; // lg: 3 items (max)
     if (width >= 640) return 2;  // sm: 2 items
@@ -195,9 +215,9 @@ export default function EventsPage() {
   };
 
   // Update the carousel item class to use more specific logic
-  const getCardClassForEvent = (totalEvents, index) => {
+  const getCardClassForEvent = (totalEvents: number, index: number): string => {
     // Base classes for spacing and flexibility
-    let baseClass = "pl-4 min-w-0 flex-shrink-0 ";
+    const baseClass = "pl-4 min-w-0 flex-shrink-0 ";
     
     // Add width classes based on total events
     if (totalEvents === 1) {
