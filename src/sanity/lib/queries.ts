@@ -177,8 +177,53 @@ export const servicesPageQuery = groq`
       keywords
     }
   }
-`;
+`
 
+
+// Query to fetch events page content
+export const eventsPageQuery = groq`
+  *[_type == "pages" && pageType == "events"][0] {
+    eventsTitle,
+    eventsDescription,
+    eventsServices[] {
+      title,
+      description
+    }
+  }
+`
+
+
+// Query to fetch list of events
+export const eventsListQuery = groq`
+  *[_type == "event"] | order(featured desc, eventDate desc) {
+    _id,
+    title,
+    slug,
+    mainImage,
+    eventDate,
+    location,
+    summary,
+    description,
+    quote,
+    stats[] {
+      value,
+      label
+    }
+  }
+`
+
+// Query for featured events only
+export const featuredEventsQuery = groq`
+  *[_type == "event" && featured == true] | order(eventDate desc) {
+    _id,
+    title,
+    slug,
+    mainImage,
+    eventDate,
+    location,
+    summary
+  }
+`
 
 
 

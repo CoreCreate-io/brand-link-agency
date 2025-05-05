@@ -1,245 +1,467 @@
-import { Metadata } from 'next'
-import Image from 'next/image'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+"use client";
+
+import { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { client } from '@/sanity/lib/client';
+import { eventsPageQuery, eventsListQuery } from '@/sanity/lib/queries';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
+import { motion } from "framer-motion";
+import { formatDate } from '@/lib/utils';
+import imageUrlBuilder from '@sanity/image-url';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext as PaginationNextComponent,
+  PaginationPrevious as PaginationPreviousComponent,
+} from "@/components/ui/pagination";
+import useEmblaCarousel from 'embla-carousel-react';
 
-export const metadata: Metadata = {
-  title: 'Events | Brand Link Agency',
-  description: 'We craft experiences that move people. From intimate VIP dinners to large-scale brand campaigns and talent tours.',
+// Create a local image URL builder function
+const builder = imageUrlBuilder(client);
+function getEventImageUrl(source: any) {
+  if (!source) return "/images/event-placeholder.jpg";
+  try {
+    return builder.image(source).width(1200).height(1200).url();
+  } catch (error) {
+    console.error("Error generating image URL:", error);
+    return "/images/event-placeholder.jpg";
+  }
 }
 
-export default function EventsPage() {
-  return (
-    <main className="pt-20">
-    {/* Hero Section - Updated for better mobile layout with text first */}
-    <section className="py-24 px-6 bg-black text-white">
-      <div className="max-w-6xl mx-auto">
-        {/* Text content card - Always comes first on mobile */}
-        <div className="border border-gray-800 rounded-lg overflow-hidden bg-zinc-900/50 backdrop-blur-sm mb-8">
-          <div className="space-y-6 p-8 md:p-12">
-            <h1 className="text-4xl md:text-6xl font-bold">
-              We don't just plan events. 
-              <span className="text-primary block mt-2">We craft experiences that move people.</span>
-            </h1>
-            
-            <p className="text-base md:text-base text-gray-400">
-              From intimate VIP dinners and creator meetups to large-scale brand campaigns and national talent tours, 
-              we handle every detail from start to finish. At Brand Link Agency, events are more than just dates on a calendar. They're culture-driving moments that leave lasting impact. 
-              Whether it's a boutique gathering or a major campaign rollout, we work with venues, talent, vendors, and creators to build experiences that don't just show up on the feed, they get talked about. 
-              Every touchpoint is considered. Every vibe is intentional. Every outcome is measurable.
-            </p>
-            
-            <div className="pt-4">
-              <Button asChild size="lg">
-                <Link href="#contact">
-                  Let's Create Something Together
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-    
-        {/* Image container - Comes second on mobile, full width with no padding */}
-        <div className="md:hidden -mx-6 relative h-[300px]">
-          <Image
-            src="/images/events-hero-bg.jpg" 
-            alt="Brand Link Agency Events"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-        </div>
-    
-        {/* Desktop layout - Combined card with text and image side by side */}
-        <div className="hidden md:block border border-gray-800 rounded-lg overflow-hidden bg-zinc-900/50 backdrop-blur-sm">
-          <div className="grid grid-cols-[1.2fr_0.8fr] items-center">
-            {/* Left side - Text content */}
-            <div className="space-y-6 p-12">
-              <h1 className="text-6xl font-bold">
-                We don't just plan events. 
-                <span className="text-primary block mt-2">We craft experiences that move people.</span>
-              </h1>
-              
-              <p className="text-base text-gray-400">
-                From intimate VIP dinners and creator meetups to large-scale brand campaigns and national talent tours, 
-                we handle every detail from start to finish. At Brand Link Agency, events are more than just dates on a calendar. They're culture-driving moments that leave lasting impact. 
-                Whether it's a boutique gathering or a major campaign rollout, we work with venues, talent, vendors, and creators to build experiences that don't just show up on the feed, they get talked about. 
-                Every touchpoint is considered. Every vibe is intentional. Every outcome is measurable.
-              </p>
-              
-              <div className="pt-4">
-                <Button asChild size="lg">
-                  <Link href="#contact">
-                    Let's Create Something Together
-                  </Link>
-                </Button>
-              </div>
-            </div>
-            
-            {/* Right side - Image */}
-            <div className="relative h-auto aspect-square overflow-hidden">
-              <Image
-                src="/images/events-hero-bg.jpg" 
-                alt="Brand Link Agency Events"
-                fill
-                className="object-cover"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-l from-black/70 via-transparent to-transparent"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+// First, update the helper function to show 3 events per row on desktop
+const getCarouselItemClass = (totalEvents) => {
+  if (totalEvents === 1) return "basis-full"; 
+  if (totalEvents === 2) return "basis-full sm:basis-1/2";
+  if (totalEvents === 3 || totalEvents > 3) return "basis-full sm:basis-1/2 lg:basis-1/3"; // 3+ events show 3 per row
+};
 
-      {/* What We Do Section - Updated with black background */}
-      <section className="py-16 md:py-24 bg-black text-white px-6">
+export default function EventsPage() {
+  const [pageData, setPageData] = useState({
+    title: "",
+    description: "",
+    services: []
+  });
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start",
+    loop: false,
+    slidesToScroll: 'auto'
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch page data
+        const pageContent = await client.fetch(eventsPageQuery);
+        
+        // Fetch events data
+        const eventsData = await client.fetch(eventsListQuery);
+        
+        setPageData({
+          title: pageContent?.eventsTitle || "We craft experiences that move people",
+          description: pageContent?.eventsDescription || "From intimate VIP dinners and creator meetups to large-scale brand campaigns and national talent tours, we handle every detail from start to finish.",
+          services: pageContent?.eventsServices || []
+        });
+        
+        setEvents(eventsData || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Calculate the carousel item class based on total events
+  const carouselItemClass = getCarouselItemClass(events.length);
+
+  // Update the eventsPerView function to match
+  const eventsPerView = () => {
+    if (typeof window === 'undefined') return 1; // Server-side default
+    
+    // First check the total number of events
+    const totalEvents = events.length;
+    if (totalEvents === 1) return 1;
+    if (totalEvents === 2) return Math.min(2, getDeviceMaxEvents());
+    
+    // For 3 or more events, use responsive breakpoints
+    return getDeviceMaxEvents();
+  };
+
+  // Add this helper function to detect device capability
+  const getDeviceMaxEvents = () => {
+    const width = window.innerWidth;
+    if (width >= 1024) return 3; // lg: 3 items (max)
+    if (width >= 640) return 2;  // sm: 2 items
+    return 1; // mobile: 1 item
+  };
+  
+  const totalPages = Math.ceil(events.length / eventsPerView());
+
+  // Add a resize listener to update pagination correctly
+  useEffect(() => {
+    // Update pagination when window resizes
+    const handleResize = () => {
+      // Recalculate total pages whenever window size changes
+      const newTotalPages = Math.ceil(events.length / eventsPerView());
+      
+      // Adjust current page if needed when resizing
+      if (currentPage > newTotalPages) {
+        setCurrentPage(newTotalPages || 1);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [events.length, currentPage]);
+
+  // Add effect to handle API initialization
+  useEffect(() => {
+    if (emblaApi) {
+      // Do an initial check to make sure pagination is correct
+      const slidesPerView = eventsPerView();
+      const newTotalPages = Math.ceil(events.length / slidesPerView);
+      if (currentPage > newTotalPages) {
+        setCurrentPage(1);
+      }
+    }
+  }, [emblaApi, events.length]);
+  
+  // Add effect to handle scroll syncing with pagination
+  useEffect(() => {
+    if (!emblaApi || typeof window === 'undefined') return;
+    
+    const onScroll = () => {
+      // Only update pagination on mobile
+      if (window.innerWidth < 640) {
+        // Get the current slide index from Embla
+        const index = emblaApi.selectedScrollSnap();
+        // Calculate which page this corresponds to
+        const itemsPerPage = eventsPerView();
+        const newPage = Math.floor(index / itemsPerPage) + 1;
+        
+        // Update pagination if it doesn't match
+        if (newPage !== currentPage) {
+          setCurrentPage(newPage);
+        }
+      }
+    };
+    
+    // Subscribe to scroll events
+    emblaApi.on('scroll', onScroll);
+    emblaApi.on('settle', onScroll);
+    
+    return () => {
+      emblaApi.off('scroll', onScroll);
+      emblaApi.off('settle', onScroll);
+    };
+  }, [emblaApi, currentPage, eventsPerView]);
+
+  // Update your handlePageChange function to use the emblaApi directly
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    
+    // Calculate the item index to scroll to
+    const itemIndex = (page - 1) * eventsPerView();
+    
+    console.log('Changing to page:', page, 'Item index:', itemIndex);
+    
+    // Use the API directly instead of DOM queries
+    if (emblaApi) {
+      emblaApi.scrollTo(itemIndex);
+    }
+  };
+
+  // Update the carousel item class to use more specific logic
+  const getCardClassForEvent = (totalEvents, index) => {
+    // Base classes for spacing and flexibility
+    let baseClass = "pl-4 min-w-0 flex-shrink-0 ";
+    
+    // Add width classes based on total events
+    if (totalEvents === 1) {
+      return baseClass + "basis-full"; // Single event takes full width
+    } else if (totalEvents === 2) {
+      return baseClass + "basis-full sm:basis-1/2"; // Two events take half width each (on sm+)
+    } else {
+      return baseClass + "basis-full sm:basis-1/2 lg:basis-1/3"; // Three+ events show 3 per row max
+    }
+  };
+
+  return (
+    <main className="pt-30 bg-background">
+      {/* Hero Statement Section - Centered big statement */}
+      <section className="py-10 md:py-24 px-6 bg-background">
+        <div className="max-w-4xl mx-auto text-left md:text-center">
+          <motion.h1 
+            className="text-4xl md:text-5xl font-medium mb-8 text-foreground"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            {pageData.title}
+          </motion.h1>
+          
+          <motion.p 
+            className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            {pageData.description}
+          </motion.p>
+        </div>
+      </section>
+
+      {/* Dynamic Events Highlights Section with Carousel */}
+      <section className="py-10 md:py-24 px-6 bg-background">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl md:text-5xl font-bold mb-8 md:mb-16 text-left md:text-center text-foreground">
+            Event Highlights
+          </h2>
+          
+          {loading ? (
+            <div className="h-96 flex items-center justify-center">
+              <p className="text-muted-foreground">Loading events...</p>
+            </div>
+          ) : events.length > 0 ? (
+            <div className="relative">
+              {/* Direct Embla implementation */}
+              <div className="overflow-hidden" ref={emblaRef}>
+                <div className="flex -ml-4">
+                  {events.map((event, index) => (
+                    <div 
+                      key={event._id} 
+                      className={getCardClassForEvent(events.length, index)}
+                    >
+                      <Card className="border border-border bg-card rounded-lg overflow-hidden shadow-md h-full p-0 gap-0">
+                        {/* Perfect square image with object-cover to fill properly */}
+                        <div className="aspect-[5/4] relative overflow-hidden">
+                          <Image 
+                            src={getEventImageUrl(event.mainImage)}
+                            alt={event.title || "Event"}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            priority={index < 3} // Load first visible images with priority
+                            style={{ objectFit: 'cover', objectPosition: 'center center' }}
+                          />
+                        
+                          {/* Overlay with title and location */}  
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-transparent flex items-end">
+                            <div className="p-6">
+                              <h3 className="text-xl md:text-2xl font-bold text-white">
+                                {event.title}
+                              </h3>
+                              <p className="text-gray-200 text-sm">{event.location}, {formatDate(event.eventDate)}</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <CardContent className="p-6">
+                          {/* Description - Now the main focus */}
+                          <div className="text-sm text-muted-foreground mb-4 line-clamp-5">
+                            {event.description}
+                          </div>
+                          
+                          {/* Stats as pills */}
+                          {event.stats && event.stats.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              {event.stats.map((stat, idx) => (
+                                <div key={idx} className="inline-flex items-center bg-background/80 border border-border rounded-full px-3 py-1">
+                                  <span className="text-primary font-semibold mr-1">{stat.value}</span>
+                                  <span className="text-xs text-muted-foreground">{stat.label}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Only show pagination when we have more events than can be displayed at once */}
+              {events.length > eventsPerView() && (
+                <div className="mt-8">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPreviousComponent 
+                          onClick={() => {
+                            if (currentPage > 1) {
+                              const newPage = currentPage - 1;
+                              setCurrentPage(newPage);
+                              handlePageChange(newPage);
+                            }
+                          }}
+                          className={currentPage === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                      
+                      {totalPages <= 5 ? (
+                        // For 5 or fewer pages, show all page numbers
+                        Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                          <PaginationItem key={page}>
+                            <PaginationLink 
+                              href="#" 
+                              isActive={page === currentPage}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlePageChange(page);
+                              }}
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        ))
+                      ) : (
+                        // For more than 5 pages, show a limited set with ellipsis
+                        <>
+                          {/* First page */}
+                          <PaginationItem>
+                            <PaginationLink 
+                              href="#" 
+                              isActive={1 === currentPage}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlePageChange(1);
+                              }}
+                            >
+                              1
+                            </PaginationLink>
+                          </PaginationItem>
+                          
+                          {/* Ellipsis if needed */}
+                          {currentPage > 3 && (
+                            <PaginationItem>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          )}
+                          
+                          {/* Pages around current */}
+                          {Array.from(
+                            { length: Math.min(3, totalPages - 2) },
+                            (_, i) => {
+                              const pageNum = currentPage > 2 ? 
+                                (currentPage + i - 1 <= totalPages - 1 ? currentPage + i - 1 : totalPages - 3 + i) : 
+                                i + 2;
+                              return pageNum <= totalPages - 1 && pageNum > 1 ? (
+                                <PaginationItem key={pageNum}>
+                                  <PaginationLink 
+                                    href="#" 
+                                    isActive={pageNum === currentPage}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      handlePageChange(pageNum);
+                                    }}
+                                  >
+                                    {pageNum}
+                                  </PaginationLink>
+                                </PaginationItem>
+                              ) : null;
+                            }
+                          )}
+                          
+                          {/* Ellipsis if needed */}
+                          {currentPage < totalPages - 2 && (
+                            <PaginationItem>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          )}
+                          
+                          {/* Last page if not already shown */}
+                          {totalPages > 1 && (
+                            <PaginationItem>
+                              <PaginationLink 
+                                href="#" 
+                                isActive={totalPages === currentPage}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handlePageChange(totalPages);
+                                }}
+                              >
+                                {totalPages}
+                              </PaginationLink>
+                            </PaginationItem>
+                          )}
+                        </>
+                      )}
+                      
+                      <PaginationItem>
+                        <PaginationNextComponent 
+                          onClick={() => {
+                            if (currentPage < totalPages) {
+                              const newPage = currentPage + 1;
+                              setCurrentPage(newPage);
+                              handlePageChange(newPage);
+                            }
+                          }}
+                          className={currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="h-96 flex items-center justify-center">
+              <p className="text-muted-foreground">No events to display.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* What We Do Section - Accordion services - Now moved below events */}
+      <section className="py-10 md:py-24 bg-background px-6">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-[1fr_1.5fr] gap-12 items-start">
             {/* Left column - Section title */}
             <div className="md:sticky md:top-24">
-              <h2 className="text-3xl md:text-5xl font-bold mb-6 md:mb-0">What We Do</h2>
+              <h2 className="text-3xl md:text-5xl font-bold mb-6 md:mb-0 text-foreground">What We Do</h2>
             </div>
             
             {/* Right column - Accordions */}
             <div className="space-y-4">
               <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="item-1" className="border-gray-800">
-                  <AccordionTrigger className="text-2xl font-semibold py-4 hover:no-underline hover:text-primary">
-                    Brand Activations
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-400 text-lg pb-6">
-                    Bring your brand to life through bold, on-brand experiences designed to connect with your audience. 
-                    Our activations create memorable moments that resonate with attendees and generate authentic content.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-2" className="border-gray-800">
-                  <AccordionTrigger className="text-2xl font-semibold py-4 hover:no-underline hover:text-primary">
-                    Influencer & Creator Events
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-400 text-lg pb-6">
-                    Invite-only events that connect brands with influential creators and drive authentic engagement. 
-                    We curate the perfect mix of talent to amplify your message and create content that resonates.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-3" className="border-gray-800">
-                  <AccordionTrigger className="text-2xl font-semibold py-4 hover:no-underline hover:text-primary">
-                    Launches & Campaign Drops
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-400 text-lg pb-6">
-                    Product releases and campaign events curated for impact, content, and momentum. 
-                    We design experiences that generate excitement, press coverage, and social sharing.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-4" className="border-gray-800">
-                  <AccordionTrigger className="text-2xl font-semibold py-4 hover:no-underline hover:text-primary">
-                    Private & Community Events
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-400 text-lg pb-6">
-                    From luxury dinners to grassroots initiatives, we plan with purpose and deliver with precision. 
-                    Our team handles every detail to create meaningful connections and memorable experiences.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-5" className="border-gray-800">
-                  <AccordionTrigger className="text-2xl font-semibold py-4 hover:no-underline hover:text-primary">
-                    Talent Tours & Activations
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-400 text-lg pb-6">
-                    We organise full-scale tours for influencers and music artists. Managing logistics, bookings, venues, 
-                    accommodation, and partnerships across cities. From media runs to regional campaigns, we make sure it moves right.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-6" className="border-gray-800">
-                  <AccordionTrigger className="text-2xl font-semibold py-4 hover:no-underline hover:text-primary">
-                    Full-Service Event Production
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-400 text-lg pb-6">
-                    From concept to clean-up — run sheets, vendor coordination, styling, talent management, and content. 
-                    We manage it all so you can focus on your objectives while we handle the execution.
-                  </AccordionContent>
-                </AccordionItem>
+                {pageData.services.map((service, index) => (
+                  <AccordionItem key={index} value={`item-${index+1}`} className="border-border">
+                    <AccordionTrigger className="text-2xl font-semibold py-4 hover:no-underline hover:text-primary text-foreground">
+                      {service.title}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-lg pb-6">
+                      {service.description}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
               </Accordion>
             </div>
           </div>
         </div>
       </section>
-
-      {/* Recent Highlight Case Study - Updated with black background */}
-      <section className="py-16 md:py-24 px-6 bg-black text-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-5xl font-bold mb-16 text-center">Recent Highlights</h2>
-          
-          <div className="relative bg-zinc-900 rounded-lg overflow-hidden shadow-md border border-gray-800">
-            {/* Case Study Image */}
-            <div className="h-64 md:h-96 relative">
-              <Image 
-                src="/images/parked-up-event.jpg" 
-                alt="Parked Up YouTube Launch Party"
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex items-end">
-                <div className="p-6 md:p-10">
-                  <h3 className="text-2xl md:text-3xl font-bold text-white">
-                    'Parked Up' YouTube Launch Party
-                  </h3>
-                  <p className="text-white/80">Brisbane, April 2025</p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Case Study Content */}
-            <div className="p-6 md:p-10 space-y-6">
-              <p className="text-lg">
-                We hosted the official launch party for Parked Up, a brand-new YouTube series featuring popular Aussie influencers 
-                @reesebros, @paulie_roberts_, and @floppyyt_.
-              </p>
-              
-              <p className="text-gray-300">
-                The night brought together creators, fans, and media for an exclusive preview of the show, 
-                complete with live DJ sets, custom branding, interactive activations, and content rollouts across socials.
-              </p>
-              
-              {/* Stats Grid - With dark borders */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6">
-                <div className="text-center p-4 border border-gray-800 rounded-lg">
-                  <p className="text-primary text-3xl font-bold">700+</p>
-                  <p className="text-sm text-gray-400">guests in attendance</p>
-                </div>
-                <div className="text-center p-4 border border-gray-800 rounded-lg">
-                  <p className="text-primary text-3xl font-bold">20+</p>
-                  <p className="text-sm text-gray-400">creators and collaborators</p>
-                </div>
-                <div className="text-center p-4 border border-gray-800 rounded-lg">
-                  <p className="text-primary text-3xl font-bold">9M+</p>
-                  <p className="text-sm text-gray-400">combined social reach</p>
-                </div>
-                <div className="text-center p-4 border border-gray-800 rounded-lg">
-                  <p className="text-primary text-3xl font-bold">150+</p>
-                  <p className="text-sm text-gray-400">pieces of content posted</p>
-                </div>
-              </div>
-              
-              <p className="italic text-gray-400">
-                Parked Up is just getting started and Brand Link was there to launch it right.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
     </main>
-  )
+  );
 }

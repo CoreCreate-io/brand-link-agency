@@ -28,9 +28,14 @@ export const pages = defineType({
       title: 'Statistics & Selling Points',
     },
     {
+      name: 'events',
+      title: 'Events Page',
+    },
+    {
       name: 'seo',
       title: 'SEO & Metadata',
     }
+
   ],
   fields: [
     defineField({
@@ -62,6 +67,7 @@ export const pages = defineType({
           { title: 'Terms & Conditions', value: 'terms' },
           { title: 'About Page', value: 'about' },
           { title: 'Services', value: 'services' },
+          { title: 'Events', value: 'events' }, // Add this option
         ],
       },
       validation: (Rule) => Rule.required(),
@@ -315,46 +321,50 @@ export const pages = defineType({
       ],
     }),
 
-    // SEO Fields - Already grouped
+    // Events Section
     defineField({
-      name: 'seo',
-      title: 'SEO Settings',
-      type: 'object',
-      group: 'seo',
-      fields: [
-        defineField({
-          name: 'metaTitle',
-          title: 'Meta Title',
-          type: 'string',
-          description: 'Default to page title if left empty',
-          validation: Rule => Rule.max(60).warning('Should be under 60 characters')
-        }),
-        defineField({
-          name: 'metaDescription',
-          title: 'Meta Description',
-          type: 'text',
-          rows: 3,
-          validation: Rule => Rule.max(160).warning('Should be under 160 characters')
-        }),
-        defineField({
-          name: 'shareImage',
-          title: 'Social Share Image',
-          type: 'image',
-          description: 'Ideal size: 1200x630px',
-          options: {
-            hotspot: true,
-          }
-        }),
-        defineField({
-          name: 'keywords',
-          title: 'Keywords',
-          type: 'array',
-          of: [{ type: 'string' }],
-          options: {
-            layout: 'tags'
-          }
-        })
-      ]
+      name: 'eventsTitle',
+      title: 'Events Page Title',
+      type: 'string',
+      description: 'Main headline for the events page',
+      hidden: ({ parent }) => parent?.pageType !== 'events',
+      group: 'events',
+    }),
+    defineField({
+      name: 'eventsDescription',
+      title: 'Events Description',
+      type: 'text',
+      rows: 3,
+      description: 'Description text that appears below the title',
+      hidden: ({ parent }) => parent?.pageType !== 'events',
+      group: 'events',
+    }),
+    defineField({
+      name: 'eventsServices',
+      title: 'Events Services',
+      description: 'Services shown in the accordion section',
+      type: 'array',
+      hidden: ({ parent }) => parent?.pageType !== 'events',
+      group: 'events',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Service Title',
+              type: 'string',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'description',
+              title: 'Service Description',
+              type: 'text',
+              rows: 3,
+            }),
+          ],
+        },
+      ],
     }),
 
     // Image Scroller Section - Updated to use its own group
@@ -463,6 +473,48 @@ export const pages = defineType({
           ],
         }),
       ],
+    }),
+
+    // SEO Fields - Already grouped
+    defineField({
+      name: 'seo',
+      title: 'SEO Settings',
+      type: 'object',
+      group: 'seo',
+      fields: [
+        defineField({
+          name: 'metaTitle',
+          title: 'Meta Title',
+          type: 'string',
+          description: 'Default to page title if left empty',
+          validation: Rule => Rule.max(60).warning('Should be under 60 characters')
+        }),
+        defineField({
+          name: 'metaDescription',
+          title: 'Meta Description',
+          type: 'text',
+          rows: 3,
+          validation: Rule => Rule.max(160).warning('Should be under 160 characters')
+        }),
+        defineField({
+          name: 'shareImage',
+          title: 'Social Share Image',
+          type: 'image',
+          description: 'Ideal size: 1200x630px',
+          options: {
+            hotspot: true,
+          }
+        }),
+        defineField({
+          name: 'keywords',
+          title: 'Keywords',
+          type: 'array',
+          of: [{ type: 'string' }],
+          options: {
+            layout: 'tags'
+          }
+        })
+      ]
     }),
   ]
 })
