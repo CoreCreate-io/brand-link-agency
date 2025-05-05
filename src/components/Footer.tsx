@@ -127,7 +127,7 @@ export default function Footer() {
         </DialogContent>
       </Dialog>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+      <div className="max-w-7xl md:py-20 mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
         
         {/* Logo and About */}
         <div className="flex flex-col gap-4">

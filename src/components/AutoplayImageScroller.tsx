@@ -179,7 +179,7 @@ const AutoplayImageScroller = () => {
   return (
     <div 
       ref={scrollerRef}
-      className="relative w-full bg-background py-16 overflow-hidden"
+      className="relative w-full bg-background pt-16 overflow-hidden"
       // Use the visibility classes to ensure iOS renders it properly
       style={{ 
         willChange: 'transform, opacity'
