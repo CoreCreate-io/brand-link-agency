@@ -14,7 +14,7 @@ import imageUrlBuilder from '@sanity/image-url';
 const builder = imageUrlBuilder(client);
 
 // Helper function to build image URLs
-function urlForImage(source) {
+function urlForImage(source: any) {
   return builder.image(source);
 }
 
@@ -38,12 +38,33 @@ const SERVICES_QUERY = groq`*[_type == "pages" && pageType == "services"][0]{
   }
 }`;
 
+// Also add proper types for your service list
+type ServiceImage = {
+  _type: string;
+  asset: {
+    _ref: string;
+    _type: string;
+  };
+};
+
+type Service = {
+  title: string;
+  description: string;
+  icon?: string;
+  image?: ServiceImage;
+};
+
 export default function ServicesPage() {
+  // Update your state definition
   const [pageData, setPageData] = useState<{
     statementTitle?: string;
     introText?: string;
-    servicesList?: any[];
-  }>({});
+    servicesList: Service[];
+  }>({
+    statementTitle: "",
+    introText: "",
+    servicesList: []
+  });
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -98,7 +119,8 @@ export default function ServicesPage() {
       {/* Services grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
         {isMounted &&
-          services.map((service: any, index: number) => {
+          // Then in your map function, update the type annotation
+          services.map((service: Service, index: number) => {
             const iconName = toPascalCase(service.icon?.trim() || "");
             const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons] as React.ElementType;
             
