@@ -54,8 +54,20 @@ const getCarouselItemClass = (totalEvents: number): string => {
   return "basis-full"; // Default fallback
 };
 
+// Add this type definition near your other types at the top of the file
+
+// Define the service type to match what comes from Sanity
+type EventService = {
+  title: string;
+  description: string;
+};
+
 export default function EventsPage() {
-  const [pageData, setPageData] = useState({
+  const [pageData, setPageData] = useState<{
+    title: string;
+    description: string;
+    services: EventService[];
+  }>({
     title: "",
     description: "",
     services: []
@@ -467,7 +479,7 @@ export default function EventsPage() {
             {/* Right column - Accordions */}
             <div className="space-y-4">
               <Accordion type="single" collapsible className="w-full">
-                {pageData.services.map((service, index) => (
+                {pageData.services.map((service: EventService, index: number) => (
                   <AccordionItem key={index} value={`item-${index+1}`} className="border-border">
                     <AccordionTrigger className="text-2xl font-semibold py-4 hover:no-underline hover:text-primary text-foreground">
                       {service.title}
