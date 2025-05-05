@@ -200,7 +200,7 @@ export default function EventsPage() {
   }, [emblaApi, currentPage, eventsPerView]);
 
   // Update your handlePageChange function to use the emblaApi directly
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     setCurrentPage(page);
     
     // Calculate the item index to scroll to
