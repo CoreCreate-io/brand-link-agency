@@ -207,7 +207,7 @@ export default function AboutPage() {
   return (
     <main ref={containerRef} className="bg-background text-foreground relative min-h-[250vh] md:min-h-[200vh]">
       {/* Fixed position section that stays in view while you scroll */}
-      <section className="sticky top-50 md:top-10 h-[50vh] flex flex-col justify-center md:items-center pt-100 pb-70 md:pt-0 px-6 md:px-12 lg:px-24">
+      <section className="sticky top-50 md:top-40 h-[50vh] md:h-[80vh] flex flex-col justify-center md:items-center pt-100 pb-70 md:pb-0 md:pt-0 px-6 md:px-12 lg:px-24">
         {/* Wrap in motion.div to apply the vertical movement */}
         <motion.div 
           className="w-full"
