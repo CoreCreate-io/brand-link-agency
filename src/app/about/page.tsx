@@ -31,7 +31,7 @@ const AnimatedWord = ({ word, index, style, scrollYProgress, startRange, wordsPe
   const min = Math.max(0, revealPoint - 0.01);
   
   // Each instance of this component has its own hooks - which is fine
-  const opacity = useTransform(scrollYProgress, [min, revealPoint], [0.01, 1]);
+  const opacity = useTransform(scrollYProgress, [min, revealPoint], [0.4, 1]);
   const blur = useTransform(scrollYProgress, [min, revealPoint], ["3px", "0px"]);
   const scale = useTransform(scrollYProgress, [min, revealPoint], [-0.2, 1]);
   
@@ -56,13 +56,15 @@ const AnimatedWord = ({ word, index, style, scrollYProgress, startRange, wordsPe
   );
 };
 
-// Update ScrollAnimatedText component with TypeScript types
+// Update ScrollAnimatedText component to significantly slow down the reveal
 const ScrollAnimatedText = ({ text, style, className, scrollYProgress, startRange, endRange }: ScrollAnimatedTextProps) => {
   // Split text into words
   const words = text.split(" ");
   const MAX_WORDS = 500;
   const safeWordCount = Math.min(words.length, MAX_WORDS);
-  const wordsPerScrollUnit = words.length / (endRange - startRange) * 1.5;
+  
+  // SLOW DOWN: Change the multiplier from 1.5 to 0.75 (half the speed)
+  const wordsPerScrollUnit = words.length / (endRange - startRange) * 0.75;
   
   return (
     <p className={className}>
@@ -119,9 +121,7 @@ const ScrollIndicator = () => {
 
 export default function AboutPage() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [aboutText, setAboutText] = useState<string>(
-    "BrandLink is a premier influencer agency dedicated to creating authentic connections between brands and influential creators. We craft strategies that resonate with audiences and drive meaningful engagement, leveraging the power of authentic storytelling to build lasting relationships between brands and their target demographics."
-  );
+  const [aboutText, setAboutText] = useState<string>("");
   
   // Fetch content from Sanity on component mount
   useEffect(() => {
@@ -146,10 +146,18 @@ export default function AboutPage() {
           // Update state with the extracted text if not empty
           if (extractedText.trim()) {
             setAboutText(extractedText.trim());
+          } else {
+            // If no content is found, set a fallback message or empty string
+            setAboutText("Loading content...");
           }
+        } else {
+          // Handle case when no content blocks exist
+          setAboutText("Loading content...");
         }
       } catch (error) {
         console.error("Error fetching about page content:", error);
+        // Set an error message or fallback text
+        setAboutText("Unable to load content. Please try again later.");
       }
     };
     
@@ -187,27 +195,42 @@ export default function AboutPage() {
     ]
   );
 
+  // Add a transform for vertical movement as user scrolls
+  const textPositionY = useTransform(
+    scrollYProgress,
+    [0, 0.3],
+    ['0%', '-15%']  // Start at normal position, move up 15% as scrolling progresses
+  );
+  
+  // Reduce the spacer height and adjust margins to fix the large gap
+  
   return (
-    <main ref={containerRef} className="bg-background text-foreground relative min-h-[130vh]">
+    <main ref={containerRef} className="bg-background text-foreground relative min-h-[250vh] md:min-h-[200vh]">
       {/* Fixed position section that stays in view while you scroll */}
-      <section className="sticky top-30 bottom-25 md:top-10 h-screen flex flex-col justify-center md:items-center pt-16 md:pt-0 px-6 md:px-12 lg:px-24">
-        <div className="max-w-3xl mx-auto w-full">
-        <ScrollAnimatedText 
-  text={aboutText}
-  style={{ color: "" }}  // Remove the motion value from here
-  className="text-xl md:text-3xl md:text-center text-left leading-relaxed pb-20 md:pb-0"
-  scrollYProgress={scrollYProgress}
-  startRange={0.05}
-  endRange={0.4}
-/>
-        </div>
+      <section className="sticky top-50 md:top-10 h-[50vh] flex flex-col justify-center md:items-center pt-100 pb-70 md:pt-0 px-6 md:px-12 lg:px-24">
+        {/* Wrap in motion.div to apply the vertical movement */}
+        <motion.div 
+          className="w-full"
+          style={{ y: textPositionY }}
+        >
+          <div className="max-w-3xl mx-auto w-full">
+            <ScrollAnimatedText 
+              text={aboutText}
+              style={{ color: "" }}
+              className="text-xl md:text-3xl md:text-center text-left leading-relaxed pb-20 md:pb-0"
+              scrollYProgress={scrollYProgress}
+              startRange={0}
+              endRange={0.35}
+            />
+          </div>
+        </motion.div>
       </section>
       
       {/* Add the scroll indicator */}
       <ScrollIndicator />
       
-      {/* Reduced invisible section to provide scroll space */}
-      <section className="h-[20vh]"></section>
+      {/* Adjust only the spacer height - reduce it significantly */}
+      <section className="h-[30vh] mb-0"></section>
     </main>
   );
 }
