@@ -193,7 +193,7 @@ export const eventsPageQuery = groq`
 `
 
 
-// Query to fetch list of events
+// Query to fetch list of events - Streamlined for the new card design
 export const eventsListQuery = groq`
   *[_type == "event"] | order(featured desc, eventDate desc) {
     _id,
@@ -202,9 +202,7 @@ export const eventsListQuery = groq`
     mainImage,
     eventDate,
     location,
-    summary,
     description,
-    quote,
     stats[] {
       value,
       label
@@ -212,7 +210,7 @@ export const eventsListQuery = groq`
   }
 `
 
-// Query for featured events only
+// Query for featured events only - Matching the regular events query structure
 export const featuredEventsQuery = groq`
   *[_type == "event" && featured == true] | order(eventDate desc) {
     _id,
@@ -221,9 +219,27 @@ export const featuredEventsQuery = groq`
     mainImage,
     eventDate,
     location,
-    summary
+    description,
+    stats[] {
+      value,
+      label
+    }
   }
 `
+
+export const aboutPageQuery = `*[_type == "pages" && pageType == "about"][0]{
+  title,
+  content,
+  "slug": slug.current,
+  seo {
+    metaTitle,
+    metaDescription,
+    "shareImage": shareImage.asset->url,
+    keywords
+  }
+}`;
+
+
 
 
 
