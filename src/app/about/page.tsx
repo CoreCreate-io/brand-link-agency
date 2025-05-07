@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform, useMotionValueEvent, animate, useAnimate, MotionValue } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValueEvent, animate, useAnimate, MotionValue, useSpring } from "framer-motion";
 import { client } from "@/sanity/lib/client";
 import { aboutPageQuery } from "@/sanity/lib/queries";
 import { ChevronDown } from "lucide-react";
@@ -156,10 +156,16 @@ export default function AboutPage() {
     fetchContent();
   }, []);
   
-  const { scrollYProgress } = useScroll({
+  const { scrollYProgress: rawScrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end start"],
-    smooth: 0.8
+    offset: ["start start", "end start"]
+  });
+
+  // Create a smoothed version of the scroll progress
+  const scrollYProgress = useSpring(rawScrollYProgress, { 
+    stiffness: 80, 
+    damping: 20, 
+    restDelta: 0.001 
   });
   
   const [currentSection, setCurrentSection] = useState<number>(0);
@@ -186,14 +192,14 @@ export default function AboutPage() {
       {/* Fixed position section that stays in view while you scroll */}
       <section className="sticky top-30 bottom-25 md:top-10 h-screen flex flex-col justify-center md:items-center pt-16 md:pt-0 px-6 md:px-12 lg:px-24">
         <div className="max-w-3xl mx-auto w-full">
-          <ScrollAnimatedText 
-            text={aboutText}
-            style={{ color: textColor }}
-            className="text-xl md:text-3xl md:text-center text-left leading-relaxed pb-20 md:pb-0"
-            scrollYProgress={scrollYProgress}
-            startRange={0.05}
-            endRange={0.4}
-          />
+        <ScrollAnimatedText 
+  text={aboutText}
+  style={{ color: "" }}  // Remove the motion value from here
+  className="text-xl md:text-3xl md:text-center text-left leading-relaxed pb-20 md:pb-0"
+  scrollYProgress={scrollYProgress}
+  startRange={0.05}
+  endRange={0.4}
+/>
         </div>
       </section>
       
