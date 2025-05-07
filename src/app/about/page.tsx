@@ -1,13 +1,32 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform, useMotionValueEvent, animate, useAnimate } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValueEvent, animate, useAnimate, MotionValue } from "framer-motion";
 import { client } from "@/sanity/lib/client";
 import { aboutPageQuery } from "@/sanity/lib/queries";
 import { ChevronDown } from "lucide-react";
 
-// This component handles a single word animation
-const AnimatedWord = ({ word, index, style, scrollYProgress, startRange, wordsPerScrollUnit }) => {
+// Add these type interfaces at the top of your file, below imports
+interface AnimatedWordProps {
+  word: string;
+  index: number;
+  style: React.CSSProperties;
+  scrollYProgress: MotionValue<number>;
+  startRange: number;
+  wordsPerScrollUnit: number;
+}
+
+interface ScrollAnimatedTextProps {
+  text: string;
+  style: React.CSSProperties;
+  className: string;
+  scrollYProgress: MotionValue<number>;
+  startRange: number;
+  endRange: number;
+}
+
+// Update your AnimatedWord component with TypeScript types
+const AnimatedWord = ({ word, index, style, scrollYProgress, startRange, wordsPerScrollUnit }: AnimatedWordProps) => {
   const revealPoint = startRange + (index / wordsPerScrollUnit);
   const min = Math.max(0, revealPoint - 0.01);
   
@@ -37,8 +56,8 @@ const AnimatedWord = ({ word, index, style, scrollYProgress, startRange, wordsPe
   );
 };
 
-// This component splits text into words and renders AnimatedWord for each
-const ScrollAnimatedText = ({ text, style, className, scrollYProgress, startRange, endRange }) => {
+// Update ScrollAnimatedText component with TypeScript types
+const ScrollAnimatedText = ({ text, style, className, scrollYProgress, startRange, endRange }: ScrollAnimatedTextProps) => {
   // Split text into words
   const words = text.split(" ");
   const MAX_WORDS = 500;
@@ -62,7 +81,7 @@ const ScrollAnimatedText = ({ text, style, className, scrollYProgress, startRang
   );
 };
 
-// New scroll indicator component with bounce animation
+// New scroll indicator component with bounce animation - add proper type annotations
 const ScrollIndicator = () => {
   // Animate fade out on scroll
   const { scrollY } = useScroll();
@@ -100,7 +119,7 @@ const ScrollIndicator = () => {
 
 export default function AboutPage() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [aboutText, setAboutText] = useState(
+  const [aboutText, setAboutText] = useState<string>(
     "BrandLink is a premier influencer agency dedicated to creating authentic connections between brands and influential creators. We craft strategies that resonate with audiences and drive meaningful engagement, leveraging the power of authentic storytelling to build lasting relationships between brands and their target demographics."
   );
   
@@ -108,14 +127,15 @@ export default function AboutPage() {
   useEffect(() => {
     const fetchContent = async () => {
       try {
+        // Type cast or define a proper interface for aboutData
         const aboutData = await client.fetch(aboutPageQuery);
         
         if (aboutData?.content && aboutData.content.length > 0) {
           // Extract text from portable text blocks
           let extractedText = "";
-          aboutData.content.forEach(block => {
+          aboutData.content.forEach((block: any) => {
             if (block._type === 'block' && block.children) {
-              block.children.forEach(child => {
+              block.children.forEach((child: any) => {
                 if (child._type === 'span' && child.text) {
                   extractedText += child.text + " ";
                 }
@@ -142,9 +162,9 @@ export default function AboutPage() {
     smooth: 0.8
   });
   
-  const [currentSection, setCurrentSection] = useState(0);
+  const [currentSection, setCurrentSection] = useState<number>(0);
   
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+  useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
     const newSection = Math.floor(latest * 4);
     if (newSection !== currentSection) {
       setCurrentSection(newSection);
